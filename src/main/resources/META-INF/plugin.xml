@@ -8,7 +8,7 @@
     <name>CodeLineStack</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="mr.rtfsc@gmail.com" url="https://www.lane.com">YourCompany</vendor>
+    <vendor email="mr.rtfsc@gmail.com" url="https://www.lane.com">lane</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
@@ -25,16 +25,26 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+        <toolWindow factoryClass="com.lane.toolWindow.MyToolWindowFactory" id="Code Line Stack"
+                    icon="AllIcons.Toolwindows.Documentation" secondary="true"/>
 
     </extensions>
     <actions>
-        <action class="com.lane.action.MyAction" description="Notification Send">
-            <!-- 该标签表示通过快捷键触发Action，注意快捷键可能会冲突，导致功能无法被触发，更换绑定的快捷键即可 -->
-            <keyboard-shortcut first-keystroke="control shift o" keymap="$default"/>
+        <!--        <action class="com.lane.action.MyAction" description="Notification Send">-->
+        <!--            &lt;!&ndash; 该标签表示通过快捷键触发Action，注意快捷键可能会冲突，导致功能无法被触发，更换绑定的快捷键即可 &ndash;&gt;-->
+        <!--            <keyboard-shortcut first-keystroke="control shift o" keymap="$default"/>-->
+        <!--        </action>-->
+        <action class="com.lane.action.AddLineAction" description="add current line to stack"
+                text="add this line to stack"
+                id="action.AddLineAction">
+            <add-to-group anchor="first" group-id="EditorPopupMenu"/>
         </action>
     </actions>
+
+
     <applicationListeners>
-        <listener class="com.lane.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.lane.listeners.MyApplicationActivationListener"
+                  topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
 
 </idea-plugin>

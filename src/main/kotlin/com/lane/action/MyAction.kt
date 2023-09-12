@@ -10,13 +10,13 @@ import com.lane.services.MyProjectService
 
 class MyAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project
-        val projectService = project?.service<MyProjectService>()
-        val numb = projectService?.getRandomNumber()
-
-        Notifications.Bus.notify(
-            Notification("code line stack", "numb=" + numb, NotificationType.INFORMATION), e.project
-        );
+//        val project = e.project
+//        val projectService = project?.service<MyProjectService>()
+//        val numb = projectService?.getRandomNumber()
+//
+//        Notifications.Bus.notify(
+//            Notification("code line stack", "numb=" + numb, NotificationType.INFORMATION), e.project
+//        );
 
     }
 
