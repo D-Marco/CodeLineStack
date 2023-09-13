@@ -33,7 +33,7 @@ class MyToolWindowFactory : ToolWindowFactory {
         val content = ContentFactory.getInstance().createContent(myToolWindow.getContent(), null, false)
         toolWindow.contentManager.addContent(content)
 
-        val group = ActionManager.getInstance().getAction("AddLineActions") as ActionGroup
+        val group = ActionManager.getInstance().getAction("MenuActions") as ActionGroup
         toolWindow.setTitleActions(group.getChildren(null).toMutableList())
     }
 
@@ -57,7 +57,6 @@ class MyToolWindowFactory : ToolWindowFactory {
             tree.setExpandableItemsEnabled(true)
             tree.isRootVisible = false
             tree.cellRenderer = ProjectViewRenderer()
-
             //add double click listener to leaf
             tree.addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent?) {

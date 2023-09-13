@@ -42,15 +42,18 @@
             <add-to-group anchor="first" group-id="EditorPopupMenu"/>
         </action>
 
-        <group id="AddLineActions">
+        <group id="MenuActions">
 
         </group>
 
         <action class="com.lane.action.AddItemAction" description="Add Item" text="Add Item" id="action.AddItemAction"
                 icon="AllIcons.Actions.AddList">
-            <add-to-group group-id="AddLineActions"/>
+            <add-to-group group-id="MenuActions"/>
         </action>
-
+        <action class="com.lane.action.DeleteItemOrCodeLineStackAction" description="Delete" text="Delete" id="action.DeleteItemOrCodeLineStackAction"
+                icon="AllIcons.Actions.DeleteTagHover">
+            <add-to-group group-id="MenuActions"/>
+        </action>
     </actions>
 
 

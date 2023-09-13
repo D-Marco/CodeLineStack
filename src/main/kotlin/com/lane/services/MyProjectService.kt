@@ -7,13 +7,13 @@ import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.ui.treeStructure.Tree
 import com.lane.MyBundle
 import javax.swing.tree.DefaultMutableTreeNode
 
 @Service(Service.Level.PROJECT)
 class MyProjectService(project: Project) {
     private var globalProject: Project
-
     init {
         globalProject = project
         thisLogger().info(MyBundle.message("projectService", project.name))
@@ -35,7 +35,7 @@ class MyProjectService(project: Project) {
             val cursorModel = editor?.caretModel
             val document: Document = editor!!.document
             if (line > 0 && line <= document.getLineCount()) {
-                cursorModel?.moveToOffset(editor.document.getLineStartOffset(line-1))
+                cursorModel?.moveToOffset(editor.document.getLineStartOffset(line - 1))
                 editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE);
             }
 
