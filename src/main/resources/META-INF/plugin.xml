@@ -25,20 +25,32 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.lane.toolWindow.MyToolWindowFactory" id="Code Line Stack"
+        <toolWindow factoryClass="com.lane.toolWindow.MyToolWindowFactory" id="CodeLineStackToolWindow"
                     icon="AllIcons.Toolwindows.Documentation" secondary="true"/>
 
     </extensions>
+
+
     <actions>
         <!--        <action class="com.lane.action.MyAction" description="Notification Send">-->
         <!--            &lt;!&ndash; 该标签表示通过快捷键触发Action，注意快捷键可能会冲突，导致功能无法被触发，更换绑定的快捷键即可 &ndash;&gt;-->
         <!--            <keyboard-shortcut first-keystroke="control shift o" keymap="$default"/>-->
         <!--        </action>-->
         <action class="com.lane.action.AddLineAction" description="add current line to stack"
-                text="add this line to stack"
+                text="Add This Line To Stack"
                 id="action.AddLineAction">
             <add-to-group anchor="first" group-id="EditorPopupMenu"/>
         </action>
+
+        <group id="AddLineActions">
+
+        </group>
+
+        <action class="com.lane.action.AddItemAction" description="Add Item" text="Add Item" id="action.AddItemAction"
+                icon="AllIcons.Actions.AddList">
+            <add-to-group group-id="AddLineActions"/>
+        </action>
+
     </actions>
 
 
