@@ -42,28 +42,25 @@
             <add-to-group anchor="first" group-id="EditorPopupMenu"/>
         </action>
 
-        <group id="MenuActions">
-
-        </group>
-
+        <group id="ItemActionMenu"/>
+        <action class="com.lane.action.MakeItemAsDefaultAction" description="Make item as Default" text="Make Item as Default"
+                id="action.MakeItemAsDefaultAction">
+            <add-to-group group-id="ItemActionMenu"/>
+        </action>
         <action class="com.lane.action.AddItemAction" description="Add item" text="Add Item" id="action.AddItemAction"
                 icon="AllIcons.Actions.AddList">
-            <add-to-group group-id="MenuActions"/>
+            <add-to-group group-id="ItemActionMenu"/>
         </action>
         <action class="com.lane.action.DeleteItemOrCodeLineStackAction" description="Delete" text="Delete" id="action.DeleteItemOrCodeLineStackAction"
                 icon="AllIcons.Actions.DeleteTagHover">
-            <add-to-group group-id="MenuActions"/>
+            <add-to-group group-id="ItemActionMenu"/>
         </action>
         <action class="com.lane.action.EditAction" description="Edit" text="Edit"
                 id="action.EditAction"
                 icon="AllIcons.Actions.Edit">
-            <add-to-group group-id="MenuActions"/>
+            <add-to-group group-id="ItemActionMenu"/>
         </action>
-        <action class="com.lane.action.EditAction" description="Edit" text="Edit"
-                id="action.E2ditAction"
-                icon="AllIcons.Nodes.BookmarkGroup">
-            <add-to-group group-id="MenuActions"/>
-        </action>
+
     </actions>
 
 

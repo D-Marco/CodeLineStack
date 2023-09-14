@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlElement
 
 @XmlAccessorType(XmlAccessType.FIELD)
 class Item {
+
     @field:XmlAttribute(name = "id")
     var id = ""
 
@@ -16,7 +17,5 @@ class Item {
     @field:XmlElement(name = "line")
     var lineList: ArrayList<Line>? = null
 
-    override fun toString(): String {
-        return name
-    }
+
 }

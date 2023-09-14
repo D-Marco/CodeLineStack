@@ -20,6 +20,7 @@ import javax.xml.bind.JAXBContext
 
 @Service(Service.Level.PROJECT)
 class MyProjectService(private val project: Project) {
+    private var defaultItem: Item? = null
     private var tree: Tree? = null
     private var treeModel: DefaultTreeModel? = null
     private var treeRoot: DefaultMutableTreeNode? = null
@@ -75,16 +76,18 @@ class MyProjectService(private val project: Project) {
         invalidTree()
     }
 
-    fun getDefaultItem(): Item? {
-        val lineStack = getLineStack()
-        val defaultItemId = lineStack.defaultItemId
-        for (item in lineStack.itemList!!) {
-            if (item.id == defaultItemId) {
-                return item
-
+    public fun getDefaultItem(): Item? {
+        if (defaultItem == null) {
+            val lineStack = getLineStack()
+            val defaultItemId = lineStack.defaultItemId
+            for (item in lineStack.itemList!!) {
+                if (item.id == defaultItemId) {
+                    defaultItem = item
+                    break
+                }
             }
         }
-        return null
+        return defaultItem
 
     }
 
@@ -113,8 +116,10 @@ class MyProjectService(private val project: Project) {
         if (defaultItem != null) {
             val lineNode = DefaultMutableTreeNode()
             lineNode.userObject = line
-            itemNode.insert(lineNode, 0)
+//            itemNode.insert(lineNode, 0)
         }
+    }
+    fun makeItemAsDefault(item: Item) {
 
     }
 

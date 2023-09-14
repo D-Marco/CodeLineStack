@@ -20,9 +20,4 @@ class Line {
 
     @field:XmlAttribute(name = "fileName")
     var fileName = ""
-
-    override fun toString(): String {
-        return "[ $fileName ]:  $text"
-    }
-
 }
