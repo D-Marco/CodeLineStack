@@ -1,24 +1,29 @@
 package com.lane.toolWindow
 
-import com.intellij.ide.projectView.impl.ProjectViewRenderer
 import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
-import com.intellij.util.ui.JBUI
+import com.lane.dataBeans.Item
+import com.lane.dataBeans.Line
 import com.lane.services.MyProjectService
+import java.awt.Component
 import java.awt.FlowLayout
-import java.awt.GridBagConstraints
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.io.File
+import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JTree
 import javax.swing.tree.DefaultMutableTreeNode
+import javax.swing.tree.DefaultTreeCellRenderer
 import javax.swing.tree.DefaultTreeModel
 
 
@@ -29,89 +34,110 @@ class MyToolWindowFactory : ToolWindowFactory {
     }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        //创建视图
         val myToolWindow = MyToolWindow(toolWindow)
         val content = ContentFactory.getInstance().createContent(myToolWindow.getContent(), null, false)
         toolWindow.contentManager.addContent(content)
 
+        //初始化服务
+        val myProjectService = toolWindow.project.service<MyProjectService>()
+        myProjectService.setTree(myToolWindow.getTree())
+
+        //添加菜单栏
         val group = ActionManager.getInstance().getAction("MenuActions") as ActionGroup
         toolWindow.setTitleActions(group.getChildren(null).toMutableList())
+
+        val fullFilePath = project.basePath + "/codeLineStack.xml"
+        val storeFile = File(fullFilePath)
+        if (!storeFile.exists()) {
+            storeFile.createNewFile()
+            storeFile.writeText(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                        "<lineStack >\n" +
+                        "</lineStack>", Charsets.UTF_8
+            )
+        } else {
+            myProjectService.renderTree()
+        }
     }
 
     override fun shouldBeAvailable(project: Project) = true
 
     class MyToolWindow(toolWindow: ToolWindow) {
-        private val myProjectService = toolWindow.project.service<MyProjectService>()
-        fun getContent(): JBScrollPane {
-            val scrollPane = JBScrollPane()
+        private val scrollPane: JBScrollPane = JBScrollPane()
+        private val tree: Tree
+
+        init {
             val panel = JPanel().apply {
                 layout = FlowLayout(FlowLayout.LEFT)
             }
-
             val root = DefaultMutableTreeNode()
-            for (i in 0..5) {
-                root.add(buildChild("$i"))
-            }
-            //add to tree
-            val tree = Tree(DefaultTreeModel(root))
-            tree.setDragEnabled(true)
+            tree = Tree(DefaultTreeModel(root))
             tree.setExpandableItemsEnabled(true)
+            tree.setDragEnabled(true)
             tree.isRootVisible = false
-            tree.cellRenderer = ProjectViewRenderer()
-            //add double click listener to leaf
-            tree.addMouseListener(object : MouseAdapter() {
-                override fun mouseClicked(e: MouseEvent?) {
-                    if (e!!.clickCount == 2) { // 检查是否双击
-                        val reePath = tree.getPathForLocation(e.x, e.y)
-                        if (reePath != null) {
-                            val node = reePath.lastPathComponent as DefaultMutableTreeNode
-                            if (node.isLeaf) {
-                                handleDoubleClick(node)
-                            }
-                        }
-
-                    }
-                }
-            })
-
-            //add toolbar
-//            val toolBarDecorator = ToolbarDecorator.createDecorator(tree)
-//            toolBarDecorator.setAddAction { addAction(root) }
+            tree.cellRenderer = CustomTreeCellRenderer()
+            val myProjectService = toolWindow.project.service<MyProjectService>()
+            tree.addMouseListener(MyMouseAdapter(tree, myProjectService))
 
             // tree add to panel
             panel.add(tree)
             scrollPane.viewport.add(panel)
+        }
+
+        fun getContent(): JBScrollPane {
             return scrollPane
         }
 
-        private fun handleDoubleClick(defaultTreeModel: DefaultMutableTreeNode) {
-            myProjectService.openSelectedFile(defaultTreeModel)
+        fun getTree(): Tree {
+            return tree
         }
 
+    }
 
-        private fun buildChild(name: String): DefaultMutableTreeNode {
-            val childLeaf = DefaultMutableTreeNode()
-            childLeaf.userObject = "childLeaf$name"
-            val child = DefaultMutableTreeNode();
-            child.add(childLeaf)
-            child.userObject = "child$name"
-            return child
-        }
-
-        /**
-         * reference from <https://stackoverflow.com/questions/9851688/how-to-align-left-or-right-inside-gridbaglayout-cell>
-         */
-        private fun createGbc(x: Int, y: Int): GridBagConstraints {
-            val gbc = GridBagConstraints()
-            gbc.gridx = x
-            gbc.gridy = y
-            gbc.gridwidth = 1
-            gbc.gridheight = 1
-            gbc.anchor = if (x == 0) GridBagConstraints.WEST else GridBagConstraints.EAST
-            gbc.fill = if (x == 0) GridBagConstraints.BOTH else GridBagConstraints.HORIZONTAL
-            gbc.insets = if (x == 0) JBUI.insets(5, 0, 5, 5) else JBUI.insets(5, 5, 5, 0)
-            gbc.weightx = if (x == 0) 0.1 else 1.0
-            gbc.weighty = 1.0
-            return gbc
+    class MyMouseAdapter(private val tree: Tree, private val service: MyProjectService) : MouseAdapter() {
+        override fun mouseClicked(e: MouseEvent?) {
+            if (e!!.clickCount == 2) { // 检查是否双击
+                val reePath = tree.getPathForLocation(e.x, e.y)
+                if (reePath != null) {
+                    val node = reePath.lastPathComponent as DefaultMutableTreeNode
+                    if (node.isLeaf) {
+                        service.openSelectedFile(node)
+                    }
+                }
+            }
         }
     }
+
+    class CustomTreeCellRenderer : DefaultTreeCellRenderer() {
+        override fun getTreeCellRendererComponent(
+            tree: JTree?,
+            value: Any?,
+            sel: Boolean,
+            expanded: Boolean,
+            leaf: Boolean,
+            row: Int,
+            hasFocus: Boolean
+        ): Component {
+            val nodeLabel: JLabel =
+                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus) as JLabel
+            if (value != null) {
+                val treeNode = value as DefaultMutableTreeNode
+                val nodeUserObj = treeNode.userObject
+                when (nodeUserObj) {
+                    is Line -> {
+                        // 加载并设置您的 SVG 图标
+                        nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmark.svg", javaClass)
+                    }
+
+                    is Item -> {
+                        nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmarksList.svg", javaClass)
+                    }
+                }
+            }
+
+            return nodeLabel
+        }
+    }
+
 }
