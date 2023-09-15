@@ -1,9 +1,13 @@
 package com.lane.action
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.lane.dataBeans.Line
 import com.lane.services.MyProjectService
@@ -11,37 +15,51 @@ import com.lane.services.MyProjectService
 
 class AddLineAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val editor = e.getData(CommonDataKeys.EDITOR)
-        val cursor = editor?.caretModel?.primaryCaret
-        val lineNum = cursor?.logicalPosition?.line
-        println("current line $lineNum")
+        val project = e.project
+        val myProjectService = project?.service<MyProjectService>()
+        if (myProjectService != null) {
+            if (!myProjectService.existDefaultItem()) {
+                showNotExistDefaultItemTip(project,"CodeLineStack")
+                return
+            }
+            val editor = e.getData(CommonDataKeys.EDITOR)
+            val cursor = editor?.caretModel?.primaryCaret
+            val lineNum = cursor?.logicalPosition?.line
+            val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
+            val document = editor?.document
+            if (document != null && lineNum != null && file != null) {
+                val lineStartOffset = document.getLineStartOffset(lineNum)
+                val lineEndOffset = document.getLineEndOffset(lineNum)
+                val lineText = document.getText(TextRange(lineStartOffset, lineEndOffset))
+                val fileName = file.name
+                val basePath = e.project?.basePath
+                if (basePath != null) {
+                    val filePath = file.path.substring(basePath.length + 1)
+                    val line = Line()
+                    line.text = lineText
+                    line.selectionLine = lineNum
+                    line.fileName = fileName
+                    line.fileRelativePath = filePath
 
-        val basePath = e.project?.basePath
-        println("current project basePath: $basePath")
-
-        val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
-        if (file != null) {
+                    if (myProjectService.existDefaultItem()) {
+                        myProjectService.addLineToDefaultItem(line)
+                    }
+                }
+            }
         }
-        val document = editor?.document
-        if (document != null && lineNum != null && file != null) {
-            val lineStartOffset = document.getLineStartOffset(lineNum)
-            val lineEndOffset = document.getLineEndOffset(lineNum)
-            val lineText = document.getText(TextRange(lineStartOffset, lineEndOffset))
-            val fileName = file.name
-            val filePath = file.path
+    }
 
-            val line = Line()
-            line.text = lineText
-            line.selectionLine = lineNum
-            line.fileName = fileName
-            line.fileRelativePath = filePath
+    fun showNotExistDefaultItemTip(project: Project,pluginId:String) {
+        val title = "CodeLineStack"
+        val content = "The default item has not been set yet"
 
-            val project = e.project
-            val myProjectService = project?.service<MyProjectService>()
-//                myProjectService!!.addLine(line,)
+        val notification = Notification(
+            pluginId,
+            title,
+            content,
+            NotificationType.WARNING
+        )
 
-        }
-
-
+        Notifications.Bus.notify(notification, project)
     }
 }
