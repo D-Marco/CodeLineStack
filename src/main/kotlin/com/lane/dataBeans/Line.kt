@@ -12,6 +12,9 @@ class Line {
     @field:XmlAttribute(name = "text")
     var text = ""
 
+    @field:XmlAttribute(name = "id")
+    var id = ""
+
     @field:XmlAttribute(name = "fileRelativePath")
     var fileRelativePath = ""
 

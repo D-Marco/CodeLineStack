@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.lane.dataBeans.Line
 import com.lane.services.MyProjectService
+import java.util.*
 
 
 class AddLineAction : AnAction() {
@@ -19,7 +20,7 @@ class AddLineAction : AnAction() {
         val myProjectService = project?.service<MyProjectService>()
         if (myProjectService != null) {
             if (!myProjectService.existDefaultItem()) {
-                showNotExistDefaultItemTip(project,"CodeLineStack")
+                showNotExistDefaultItemTip(project, "CodeLineStack")
                 return
             }
             val editor = e.getData(CommonDataKeys.EDITOR)
@@ -40,6 +41,7 @@ class AddLineAction : AnAction() {
                     line.selectionLine = lineNum
                     line.fileName = fileName
                     line.fileRelativePath = filePath
+                    line.id = UUID.randomUUID().toString()
 
                     if (myProjectService.existDefaultItem()) {
                         myProjectService.addLineToDefaultItem(line)
@@ -49,7 +51,7 @@ class AddLineAction : AnAction() {
         }
     }
 
-    fun showNotExistDefaultItemTip(project: Project,pluginId:String) {
+    fun showNotExistDefaultItemTip(project: Project, pluginId: String) {
         val title = "CodeLineStack"
         val content = "The default item has not been set yet"
 

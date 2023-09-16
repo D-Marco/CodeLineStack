@@ -72,6 +72,23 @@
                 id="action.AddLineAction">
             <add-to-group anchor="first" group-id="EditorPopupMenu"/>
         </action>
+
+        <action class="com.lane.action.DeleteLineAction" description="Delete line from item"
+                text="Delete Line From Item"
+                icon="AllIcons.Actions.DeleteTagHover"
+                id="action.DeleteLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.EditLineAction" description="Rename describe"
+                text="Rename Describe"
+                icon="AllIcons.Actions.Edit"
+                id="action.EditLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="F2" keymap="$default"/>
+        </action>
+
     </actions>
 
 

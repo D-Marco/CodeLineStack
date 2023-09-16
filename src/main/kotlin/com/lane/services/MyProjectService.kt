@@ -18,7 +18,6 @@ import java.io.FileReader
 import java.util.*
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
-import javax.swing.tree.TreeNode
 import javax.xml.bind.JAXBContext
 
 @Service(Service.Level.PROJECT)
@@ -122,7 +121,7 @@ class MyProjectService(private val project: Project) {
         itemNode.insert(lineNode, 0)
     }
 
-    private fun getTreeNodeByItemId(itemId: String): DefaultMutableTreeNode? {
+    private fun getItemTreeNodeByItemId(itemId: String): DefaultMutableTreeNode? {
         val itemNodeList = treeRoot?.children()
         if (itemNodeList != null) {
             for (itemNode in itemNodeList) {
@@ -143,12 +142,18 @@ class MyProjectService(private val project: Project) {
         newItem.id = UUID.randomUUID().toString()
         newItem.name = itemName
         val lineStack = getLineStack()
+        if (lineStack.itemList == null) {
+            lineStack.itemList = ArrayList()
+        }
         lineStack.itemList?.add(newItem)
         saveLineStack(lineStack)
 
         val newNode = DefaultMutableTreeNode()
         newNode.userObject = newItem
         treeRoot?.insert(newNode, 0)
+        if (lineStack.itemList?.size == 1) {
+            treeModel?.nodeStructureChanged(treeRoot)
+        }
         tree?.updateUI()
     }
 
@@ -159,13 +164,12 @@ class MyProjectService(private val project: Project) {
         lineStack.itemList = filteredItemList?.toMutableList() as ArrayList<Item>
         saveLineStack(lineStack)
 
-        val targetItem = getTreeNodeByItemId(itemId)
+        val targetItem = getItemTreeNodeByItemId(itemId)
         if (targetItem != null) {
             treeRoot?.remove(targetItem)
             tree?.updateUI()
         }
     }
-
 
 
     fun updateItemName(newName: String, selectedItemId: String) {
@@ -180,7 +184,7 @@ class MyProjectService(private val project: Project) {
         }
         saveLineStack(lineStack)
 
-        val targetItem = getTreeNodeByItemId(selectedItemId)
+        val targetItem = getItemTreeNodeByItemId(selectedItemId)
         if (targetItem != null) {
             val item = targetItem.userObject as Item
             item.name = newName
@@ -193,20 +197,22 @@ class MyProjectService(private val project: Project) {
         lineStack.defaultItemId = item.id
         saveLineStack(lineStack)
         tree?.updateUI()
-
-
     }
 
-    public fun getDefaultItem(): Item? {
+    fun getDefaultItem(): Item? {
         if (defaultItem == null) {
             val lineStack = getLineStack()
             val defaultItemId = lineStack.defaultItemId
-            for (item in lineStack.itemList!!) {
-                if (item.id == defaultItemId) {
-                    defaultItem = item
-                    break
+            val itemList = lineStack.itemList
+            if (itemList != null) {
+                for (item in itemList) {
+                    if (item.id == defaultItemId) {
+                        defaultItem = item
+                        break
+                    }
                 }
             }
+
         }
         return defaultItem
     }
@@ -225,27 +231,48 @@ class MyProjectService(private val project: Project) {
     }
 
     fun addLineToDefaultItem(line: Line) {
-        val defaultItem = getDefaultItem()
         if (defaultItem != null) {
-            val lineNode = DefaultMutableTreeNode()
-            lineNode.userObject = line
             val lineStack = getLineStack()
             val itemList = lineStack.itemList
             if (itemList != null) {
                 for (item in itemList) {
-                    if (item.id == defaultItem.id) {
+                    if (item.id == defaultItem?.id) {
                         var lineList = item.lineList
                         if (lineList == null) {
                             lineList = ArrayList()
                         }
-                        lineList.add(line)
                         item.lineList = lineList
+                        lineList.add(line)
+                        break
                     }
                 }
             }
             saveLineStack(lineStack)
-            renderTree()
+            val targetItem = getItemTreeNodeByItemId(defaultItem!!.id)
+            val lineNode = DefaultMutableTreeNode()
+            lineNode.userObject = line
+            targetItem?.insert(lineNode, 0)
+            tree?.updateUI()
         }
     }
 
+    fun deleteLine(lineId: String, lineNode: DefaultMutableTreeNode) {
+        val lineStack = getLineStack()
+        val itemList = lineStack.itemList
+        if (itemList != null) {
+            for (item in itemList) {
+                val lineList = item.lineList
+                if (lineList != null) {
+                    val filteredLineList = lineList.filter { it.id != lineId }
+                    item.lineList = filteredLineList.toMutableList() as ArrayList<Line>
+                    break
+                }
+            }
+        }
+        saveLineStack(lineStack)
+
+        val itemNode: DefaultMutableTreeNode = lineNode.parent as DefaultMutableTreeNode
+        itemNode.remove(lineNode)
+        tree?.updateUI()
+    }
 }

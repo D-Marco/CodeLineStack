@@ -22,6 +22,8 @@ import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.JLabel
 import javax.swing.JTree
+import javax.swing.event.TreeSelectionEvent
+import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeCellRenderer
 import javax.swing.tree.DefaultTreeModel
@@ -78,7 +80,6 @@ class MyToolWindowFactory : ToolWindowFactory {
             val myProjectService = toolWindow.project.service<MyProjectService>()
             tree.cellRenderer = CustomTreeCellRenderer(myProjectService)
             tree.addMouseListener(MyMouseAdapter(myProjectService))
-
             // tree add to panel
 //            panel.add(tree)
             scrollPane.viewport.add(tree)
@@ -126,7 +127,10 @@ class MyToolWindowFactory : ToolWindowFactory {
                         }
 
                         is Line -> {
-
+                            val group = ActionManager.getInstance().getAction("lineActionMenu") as ActionGroup
+                            val popupMenu: ActionPopupMenu =
+                                ActionManager.getInstance().createActionPopupMenu(ActionPlaces.POPUP, group)
+                            popupMenu.component.show(e.component, e.x, e.y)
                         }
                     }
                     service.setLastSelectedTreeNode(treeNode)
@@ -167,7 +171,6 @@ class MyToolWindowFactory : ToolWindowFactory {
                     }
                 }
             }
-
             return nodeLabel
         }
     }
