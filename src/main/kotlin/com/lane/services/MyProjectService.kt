@@ -16,41 +16,76 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
+import javax.swing.tree.TreeNode
 import javax.xml.bind.JAXBContext
 
 @Service(Service.Level.PROJECT)
-class MyProjectService(private val project: Project) {
+class MyProjectService(val project: Project) {
     @Volatile
     private var defaultItem: Item? = null
     private var tree: Tree? = null
     private var treeModel: DefaultTreeModel? = null
     private var treeRoot: DefaultMutableTreeNode? = null
-    private var lastSelectedTreeNode: DefaultMutableTreeNode? = null
 
-    fun getProject(): Project {
-        return project
-    }
+    private var fullFilePath = ""
 
-    fun setTree(tree: Tree) {
+    private var lineStack: LineStack? = null
+
+    //以文件路径为key
+    private var lineMap: ConcurrentHashMap<String, ArrayList<Line>> = ConcurrentHashMap()
+
+    fun initData(tree: Tree) {
         this.tree = tree
         this.treeModel = tree.model as DefaultTreeModel
         this.treeRoot = treeModel!!.root as DefaultMutableTreeNode
-    }
 
-
-    fun setLastSelectedTreeNode(node: DefaultMutableTreeNode) {
-        lastSelectedTreeNode = node
+        lineStack = getLineStack()
+        initLineMap()
+        renderTree()
     }
 
     fun getLastSelectedTreeNode(): DefaultMutableTreeNode? {
-        return lastSelectedTreeNode
+        if (tree?.lastSelectedPathComponent != null) {
+            return tree?.lastSelectedPathComponent as DefaultMutableTreeNode
+        }
+        return null
     }
 
     init {
+        fullFilePath = project.basePath + "/codeLineStack.xml"
+        val storeFile = File(fullFilePath)
+
+        if (!storeFile.exists()) {
+            storeFile.createNewFile()
+            storeFile.writeText(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + "<lineStack >\n" + "</lineStack>", Charsets.UTF_8
+            )
+        }
         thisLogger().info(MyBundle.message("projectService", project.name))
-//        thisLogger().warn("Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`.")
+        thisLogger().warn("Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`.")
+    }
+
+    private fun initLineMap() {
+        lineMap = ConcurrentHashMap()
+        val itemList = lineStack?.itemList
+        if (itemList != null) {
+            for (item in itemList) {
+                val lineList = item.lineList
+                if (lineList != null) {
+                    for (line in lineList) {
+                        val lineListFromMap = lineMap[line.fileRelativePath]
+                        if (lineListFromMap == null) {
+                            lineMap[line.fileRelativePath] = ArrayList()
+                        }
+                        lineMap[line.fileRelativePath]?.add(line)
+
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -69,30 +104,27 @@ class MyProjectService(private val project: Project) {
             val document: Document = editor!!.document
             if (lineNum >= 0 && lineNum < document.lineCount) {
                 cursorModel?.moveToOffset(editor.document.getLineStartOffset(lineNum))
-                editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE);
+                editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
             }
 
         }
     }
 
     private fun getLineStack(): LineStack {
-        val fullFilePath = project.basePath + "/codeLineStack.xml"
         val storeFile = File(fullFilePath)
         val context = JAXBContext.newInstance(LineStack::class.java)
         val unmarshaller = context.createUnmarshaller()
         return unmarshaller.unmarshal(FileReader(storeFile)) as LineStack
     }
 
-    private fun saveLineStack(lineStack: LineStack) {
-        val fullFilePath = project.basePath + "/codeLineStack.xml"
+    fun saveLineStack() {
         val context = JAXBContext.newInstance(LineStack::class.java)
         val marshaller = context.createMarshaller()
         marshaller.marshal(lineStack, FileOutputStream(fullFilePath))
     }
 
-    fun renderTree() {
-        val lineStack = getLineStack()
-        val itemList = lineStack.itemList
+    private fun renderTree() {
+        val itemList = lineStack?.itemList
         treeRoot?.removeAllChildren()
         if (itemList != null) {
             for (item in itemList) {
@@ -138,32 +170,32 @@ class MyProjectService(private val project: Project) {
     }
 
     fun addItem(itemName: String) {
+        getLineStack()
         val newItem = Item()
         newItem.id = UUID.randomUUID().toString()
         newItem.name = itemName
-        val lineStack = getLineStack()
-        if (lineStack.itemList == null) {
-            lineStack.itemList = ArrayList()
+        if (lineStack?.itemList == null) {
+            lineStack?.itemList = ArrayList()
         }
-        lineStack.itemList?.add(newItem)
-        saveLineStack(lineStack)
+        lineStack?.itemList?.add(newItem)
+        saveLineStack()
 
         val newNode = DefaultMutableTreeNode()
         newNode.userObject = newItem
         treeRoot?.insert(newNode, 0)
-        if (lineStack.itemList?.size == 1) {
+        if (lineStack?.itemList?.size == 1) {
             treeModel?.nodeStructureChanged(treeRoot)
         }
         tree?.updateUI()
     }
 
     fun deleteItem(itemId: String) {
-        val lineStack = getLineStack()
-        val itemList = lineStack.itemList
+        val itemList = lineStack?.itemList
         val filteredItemList = itemList?.filter { it.id != itemId }
-        lineStack.itemList = filteredItemList?.toMutableList() as ArrayList<Item>
-        saveLineStack(lineStack)
+        lineStack?.itemList = filteredItemList?.toMutableList() as ArrayList<Item>
+        saveLineStack()
 
+        initLineMap()
         val targetItem = getItemTreeNodeByItemId(itemId)
         if (targetItem != null) {
             treeRoot?.remove(targetItem)
@@ -173,8 +205,7 @@ class MyProjectService(private val project: Project) {
 
 
     fun updateItemName(newName: String, selectedItemId: String) {
-        val lineStack = getLineStack()
-        val itemList = lineStack.itemList
+        val itemList = lineStack?.itemList
         itemList?.forEach { item ->
             run {
                 if (item.id == selectedItemId) {
@@ -182,7 +213,7 @@ class MyProjectService(private val project: Project) {
                 }
             }
         }
-        saveLineStack(lineStack)
+        saveLineStack()
 
         val targetItem = getItemTreeNodeByItemId(selectedItemId)
         if (targetItem != null) {
@@ -193,17 +224,16 @@ class MyProjectService(private val project: Project) {
 
     fun makeItemAsDefault(item: Item) {
         this.defaultItem = item
-        val lineStack = getLineStack()
-        lineStack.defaultItemId = item.id
-        saveLineStack(lineStack)
+        lineStack?.defaultItemId = item.id
+        saveLineStack()
+
         tree?.updateUI()
     }
 
     fun getDefaultItem(): Item? {
         if (defaultItem == null) {
-            val lineStack = getLineStack()
-            val defaultItemId = lineStack.defaultItemId
-            val itemList = lineStack.itemList
+            val defaultItemId = lineStack?.defaultItemId
+            val itemList = lineStack?.itemList
             if (itemList != null) {
                 for (item in itemList) {
                     if (item.id == defaultItemId) {
@@ -218,8 +248,7 @@ class MyProjectService(private val project: Project) {
     }
 
     fun existDefaultItem(): Boolean {
-        val lineStack = getLineStack()
-        val itemList = lineStack.itemList
+        val itemList = lineStack?.itemList
         if (itemList != null) {
             for (item in itemList) {
                 if (defaultItem?.id == item.id) {
@@ -232,8 +261,7 @@ class MyProjectService(private val project: Project) {
 
     fun addLineToDefaultItem(line: Line) {
         if (defaultItem != null) {
-            val lineStack = getLineStack()
-            val itemList = lineStack.itemList
+            val itemList = lineStack?.itemList
             if (itemList != null) {
                 for (item in itemList) {
                     if (item.id == defaultItem?.id) {
@@ -247,7 +275,15 @@ class MyProjectService(private val project: Project) {
                     }
                 }
             }
-            saveLineStack(lineStack)
+            saveLineStack()
+
+            val lineListFrmMap = lineMap[line.fileRelativePath]
+            if (lineListFrmMap == null) {
+                lineMap[line.fileRelativePath] = ArrayList()
+            }
+            lineMap[line.fileRelativePath]?.add(line)
+
+
             val targetItem = getItemTreeNodeByItemId(defaultItem!!.id)
             val lineNode = DefaultMutableTreeNode()
             lineNode.userObject = line
@@ -256,23 +292,111 @@ class MyProjectService(private val project: Project) {
         }
     }
 
+
     fun deleteLine(lineId: String, lineNode: DefaultMutableTreeNode) {
-        val lineStack = getLineStack()
-        val itemList = lineStack.itemList
+        val itemList = lineStack?.itemList
         if (itemList != null) {
             for (item in itemList) {
                 val lineList = item.lineList
                 if (lineList != null) {
-                    val filteredLineList = lineList.filter { it.id != lineId }
-                    item.lineList = filteredLineList.toMutableList() as ArrayList<Line>
-                    break
+                    var targetLine: Line? = null
+                    for (line in lineList) {
+                        if (line.id == lineId) {
+                            targetLine = line
+                            break
+                        }
+                    }
+                    if (targetLine != null) {
+                        lineList.remove(targetLine)
+                        lineMap[targetLine.fileRelativePath]?.remove(targetLine)
+                        break
+                    }
+
                 }
             }
         }
-        saveLineStack(lineStack)
+        saveLineStack()
 
         val itemNode: DefaultMutableTreeNode = lineNode.parent as DefaultMutableTreeNode
         itemNode.remove(lineNode)
         tree?.updateUI()
     }
+
+    fun deleteLine(lineId: String) {
+        val itemList = lineStack?.itemList
+        var targetItem: Item? = null
+        var targetLine: Line? = null
+        if (itemList != null) {
+            for (item in itemList) {
+                val lineList = item.lineList
+                if (lineList != null) {
+                    for (line in lineList) {
+                        if (line.id == lineId) {
+                            targetLine = line
+                            break
+                        }
+                    }
+                    if (targetLine != null) {
+                        targetItem = item
+                        lineList.remove(targetLine)
+                        break
+                    }
+
+                }
+            }
+        }
+        saveLineStack()
+
+        val itemListNode: Enumeration<TreeNode>? = treeRoot?.children()
+        if (itemListNode != null) {
+            for (itemNode in itemListNode) {
+                val parseItemNode = itemNode as DefaultMutableTreeNode
+                val itemData = parseItemNode.userObject as Item
+                if (itemData.id == targetItem?.id) {
+                    val lineListNode: Enumeration<TreeNode>? = itemNode.children()
+                    if (lineListNode != null) {
+                        for (lineNode in lineListNode) {
+                            val parseLineNode = lineNode as DefaultMutableTreeNode
+                            val lineData = parseLineNode.userObject as Line
+                            if (lineData.id == targetLine?.id) {
+                                itemNode.remove(lineNode)
+                                tree?.updateUI()
+                                return
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateLineDesc(newDesc: String, selectedLineId: String) {
+        val itemList = lineStack?.itemList
+        if (itemList != null) {
+            for (item in itemList) {
+                val lineList = item.lineList
+                if (lineList != null) {
+                    for (line in lineList) {
+                        if (line.id == selectedLineId) {
+                            line.describe = newDesc
+                            println("fff")
+                            break
+                        }
+                    }
+                }
+            }
+        }
+
+        saveLineStack()
+    }
+
+    fun getLineListByFileName(filePath: String): ArrayList<Line>? {
+        return lineMap[filePath]
+    }
+
+    fun updateTree() {
+        tree?.updateUI()
+    }
+
 }

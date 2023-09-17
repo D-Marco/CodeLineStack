@@ -4,10 +4,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.Messages
-import com.lane.dataBeans.Item
 import com.lane.services.MyProjectService
 import org.apache.commons.lang3.StringUtils
-import java.util.UUID
 
 
 class AddItemAction : AnAction() {

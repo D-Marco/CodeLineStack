@@ -30,7 +30,6 @@
 
     </extensions>
 
-
     <actions>
         <!--        <action class="com.lane.action.MyAction" description="Notification Send">-->
         <!--            &lt;!&ndash; 该标签表示通过快捷键触发Action，注意快捷键可能会冲突，导致功能无法被触发，更换绑定的快捷键即可 &ndash;&gt;-->
@@ -53,13 +52,13 @@
             <add-to-group group-id="ItemActionMenu"/>
         </action>
 
-        <action class="com.lane.action.DeleteItemAction" description="Delete" text="Delete This Item" id="action.DeleteItemAction"
+        <action class="com.lane.action.DeleteItemOrLineAction" description="Delete" text="Delete This Item" id="action.DeleteItemAction"
                 icon="AllIcons.Actions.DeleteTagHover">
             <add-to-group group-id="ItemActionMenu"/>
             <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
         </action>
 
-        <action class="com.lane.action.EditItemAction" description="Edit Item describe" text="Rename This Item Describe"
+        <action class="com.lane.action.EditItemOrLineAction" description="Edit Item describe" text="Rename This Item Describe"
                 id="action.EditAction"
                 icon="AllIcons.Actions.Edit">
             <add-to-group group-id="ItemActionMenu"/>
@@ -71,9 +70,10 @@
                 text="Add This Line To Stack"
                 id="action.AddLineAction">
             <add-to-group anchor="first" group-id="EditorPopupMenu"/>
+
         </action>
 
-        <action class="com.lane.action.DeleteLineAction" description="Delete line from item"
+        <action class="com.lane.action.DeleteItemOrLineAction" description="Delete line from item"
                 text="Delete Line From Item"
                 icon="AllIcons.Actions.DeleteTagHover"
                 id="action.DeleteLineAction">
@@ -81,7 +81,7 @@
             <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
         </action>
 
-        <action class="com.lane.action.EditLineAction" description="Rename describe"
+        <action class="com.lane.action.EditItemOrLineAction" description="Rename describe"
                 text="Rename Describe"
                 icon="AllIcons.Actions.Edit"
                 id="action.EditLineAction">
@@ -95,6 +95,6 @@
     <applicationListeners>
         <listener class="com.lane.listeners.MyApplicationActivationListener"
                   topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.lane.listeners.MyFileEditorManagerListener" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
-
 </idea-plugin>

@@ -12,6 +12,8 @@ import com.intellij.openapi.util.TextRange
 import com.lane.dataBeans.Line
 import com.lane.services.MyProjectService
 import java.util.*
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 
 class AddLineAction : AnAction() {

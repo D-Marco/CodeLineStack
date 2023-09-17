@@ -19,11 +19,8 @@ import com.lane.services.MyProjectService
 import java.awt.Component
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.File
 import javax.swing.JLabel
 import javax.swing.JTree
-import javax.swing.event.TreeSelectionEvent
-import javax.swing.event.TreeSelectionListener
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeCellRenderer
 import javax.swing.tree.DefaultTreeModel
@@ -43,23 +40,12 @@ class MyToolWindowFactory : ToolWindowFactory {
 
         //初始化服务
         val myProjectService = toolWindow.project.service<MyProjectService>()
-        myProjectService.setTree(myToolWindow.getTree())
+        myProjectService.initData(myToolWindow.getTree())
 
         //添加菜单栏
         val group = ActionManager.getInstance().getAction("commonActionMenu") as ActionGroup
         toolWindow.setTitleActions(group.getChildren(null).toMutableList())
 
-
-        val fullFilePath = project.basePath + "/codeLineStack.xml"
-        val storeFile = File(fullFilePath)
-        if (!storeFile.exists()) {
-            storeFile.createNewFile()
-            storeFile.writeText(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + "<lineStack >\n" + "</lineStack>", Charsets.UTF_8
-            )
-        } else {
-            myProjectService.renderTree()
-        }
     }
 
     override fun shouldBeAvailable(project: Project) = true
@@ -112,31 +98,23 @@ class MyToolWindowFactory : ToolWindowFactory {
         override fun mousePressed(e: MouseEvent?) {
             if (e != null && e.button == MouseEvent.BUTTON3) {
                 val tree = e.component as Tree
-                val reePaths = tree.selectionPaths
-                if (reePaths != null && reePaths.size == 1) {
-                    val selectionPath = reePaths[0]
-                    val treeNode = selectionPath.lastPathComponent as DefaultMutableTreeNode
-                    val userObj = treeNode.userObject
-                    when (userObj) {
-                        is Item -> {
-                            val group = ActionManager.getInstance().getAction("ItemActionMenu") as ActionGroup
-                            val popupMenu: ActionPopupMenu =
-                                ActionManager.getInstance().createActionPopupMenu(ActionPlaces.POPUP, group)
-                            popupMenu.component.show(e.component, e.x, e.y)
-
-                        }
-
-                        is Line -> {
-                            val group = ActionManager.getInstance().getAction("lineActionMenu") as ActionGroup
-                            val popupMenu: ActionPopupMenu =
-                                ActionManager.getInstance().createActionPopupMenu(ActionPlaces.POPUP, group)
-                            popupMenu.component.show(e.component, e.x, e.y)
-                        }
+                val selectedNode = tree.lastSelectedPathComponent as DefaultMutableTreeNode
+                val userObj = selectedNode.userObject
+                when (userObj) {
+                    is Item -> {
+                        val group = ActionManager.getInstance().getAction("ItemActionMenu") as ActionGroup
+                        val popupMenu: ActionPopupMenu =
+                            ActionManager.getInstance().createActionPopupMenu(ActionPlaces.POPUP, group)
+                        popupMenu.component.show(e.component, e.x, e.y)
                     }
-                    service.setLastSelectedTreeNode(treeNode)
 
+                    is Line -> {
+                        val group = ActionManager.getInstance().getAction("lineActionMenu") as ActionGroup
+                        val popupMenu: ActionPopupMenu =
+                            ActionManager.getInstance().createActionPopupMenu(ActionPlaces.POPUP, group)
+                        popupMenu.component.show(e.component, e.x, e.y)
+                    }
                 }
-
             }
         }
     }
@@ -157,6 +135,8 @@ class MyToolWindowFactory : ToolWindowFactory {
                         val fileName = nodeUserObj.fileName
                         val text = nodeUserObj.text
                         nodeLabel.text = "<html><font color='#ffffff'>[$fileName]</font> $text</html>"
+                        nodeLabel.toolTipText = nodeUserObj.describe
+
                     }
 
                     is Item -> {
@@ -166,7 +146,6 @@ class MyToolWindowFactory : ToolWindowFactory {
                             nodeLabel.text = "<html><font color='#ffffff'>[Default]</font> $name</html>"
                         } else {
                             nodeLabel.text = name
-
                         }
                     }
                 }
