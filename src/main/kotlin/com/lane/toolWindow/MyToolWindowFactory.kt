@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.ActionPopupMenu
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
@@ -99,17 +100,37 @@ class MyToolWindowFactory : ToolWindowFactory {
             if (e != null && e.button == MouseEvent.BUTTON3) {
                 val tree = e.component as Tree
                 val selectedNode = tree.lastSelectedPathComponent as DefaultMutableTreeNode
+                val firstChildOfParent = selectedNode.parent.getChildAt(0)
+                val lastChildOfParent = (selectedNode.parent as DefaultMutableTreeNode).lastChild
+
                 val userObj = selectedNode.userObject
                 when (userObj) {
                     is Item -> {
-                        val group = ActionManager.getInstance().getAction("ItemActionMenu") as ActionGroup
+                        val group: DefaultActionGroup = ActionManager.getInstance().getAction("ItemActionMenu") as DefaultActionGroup
+                        group.remove(ActionManager.getInstance().getAction("action.MoveUpItemAction"))
+                        group.remove(ActionManager.getInstance().getAction("action.MoveDownItemAction"))
+                        if (firstChildOfParent != selectedNode) {
+                            group.add(ActionManager.getInstance().getAction("action.MoveUpItemAction"))
+                        }
+                        if (lastChildOfParent != selectedNode) {
+                            group.add(ActionManager.getInstance().getAction("action.MoveDownItemAction"))
+                        }
+
                         val popupMenu: ActionPopupMenu =
                             ActionManager.getInstance().createActionPopupMenu(ActionPlaces.POPUP, group)
                         popupMenu.component.show(e.component, e.x, e.y)
                     }
 
                     is Line -> {
-                        val group = ActionManager.getInstance().getAction("lineActionMenu") as ActionGroup
+                        val group = ActionManager.getInstance().getAction("lineActionMenu") as DefaultActionGroup
+                        group.remove(ActionManager.getInstance().getAction("action.MoveUpLineAction"))
+                        group.remove(ActionManager.getInstance().getAction("action.MoveDownLineAction"))
+                        if (firstChildOfParent != selectedNode) {
+                            group.add(ActionManager.getInstance().getAction("action.MoveUpLineAction"))
+                        }
+                        if (lastChildOfParent != selectedNode) {
+                            group.add(ActionManager.getInstance().getAction("action.MoveDownLineAction"))
+                        }
                         val popupMenu: ActionPopupMenu =
                             ActionManager.getInstance().createActionPopupMenu(ActionPlaces.POPUP, group)
                         popupMenu.component.show(e.component, e.x, e.y)

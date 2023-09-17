@@ -52,28 +52,28 @@
             <add-to-group group-id="ItemActionMenu"/>
         </action>
 
-        <action class="com.lane.action.DeleteItemOrLineAction" description="Delete" text="Delete This Item" id="action.DeleteItemAction"
+        <action class="com.lane.action.DeleteItemOrLineAction"  text="Delete This Item"
+                id="action.DeleteItemAction"
                 icon="AllIcons.Actions.DeleteTagHover">
             <add-to-group group-id="ItemActionMenu"/>
             <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
         </action>
 
-        <action class="com.lane.action.EditItemOrLineAction" description="Edit Item describe" text="Rename This Item Describe"
-                id="action.EditAction"
+        <action class="com.lane.action.EditItemOrLineAction"  text="Rename This Item Describe"
+                id="action.EditItemAction"
                 icon="AllIcons.Actions.Edit">
             <add-to-group group-id="ItemActionMenu"/>
             <keyboard-shortcut first-keystroke="F2" keymap="$default"/>
         </action>
 
 
-        <action class="com.lane.action.AddLineAction" description="Add current line to stack"
+        <action class="com.lane.action.AddLineAction"
                 text="Add This Line To Stack"
                 id="action.AddLineAction">
             <add-to-group anchor="first" group-id="EditorPopupMenu"/>
-
         </action>
 
-        <action class="com.lane.action.DeleteItemOrLineAction" description="Delete line from item"
+        <action class="com.lane.action.DeleteItemOrLineAction"
                 text="Delete Line From Item"
                 icon="AllIcons.Actions.DeleteTagHover"
                 id="action.DeleteLineAction">
@@ -81,7 +81,7 @@
             <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
         </action>
 
-        <action class="com.lane.action.EditItemOrLineAction" description="Rename describe"
+        <action class="com.lane.action.EditItemOrLineAction"
                 text="Rename Describe"
                 icon="AllIcons.Actions.Edit"
                 id="action.EditLineAction">
@@ -89,6 +89,37 @@
             <keyboard-shortcut first-keystroke="F2" keymap="$default"/>
         </action>
 
+        <action class="com.lane.action.MoveUpItemOrLineAction"
+                text="Move Up"
+                icon="AllIcons.Actions.Upload"
+                id="action.MoveUpItemAction">
+            <add-to-group group-id="ItemActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt UP" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.MoveUpItemOrLineAction"
+                text="Move Up"
+                icon="AllIcons.Actions.Upload"
+                id="action.MoveUpLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt UP" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.MoveDownItemOrLineAction"
+                text="Move Down"
+                icon="AllIcons.Actions.Download"
+                id="action.MoveDownItemAction">
+            <add-to-group group-id="ItemActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt DOWN" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.MoveDownItemOrLineAction"
+                text="Move Down"
+                icon="AllIcons.Actions.Download"
+                id="action.MoveDownLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt DOWN" keymap="$default"/>
+        </action>
     </actions>
 
 

@@ -399,4 +399,162 @@ class MyProjectService(val project: Project) {
         tree?.updateUI()
     }
 
+    fun upItemTreeNode(treeNode: DefaultMutableTreeNode) {
+        val userObj = treeNode.userObject as Item
+        val parentNode: DefaultMutableTreeNode = treeNode.parent as DefaultMutableTreeNode
+        val siblingNodes = parentNode.children()
+        var treeNodeIndex = 0
+        for (siblingNode in siblingNodes) {
+            if (siblingNode == treeNode) {
+                break
+            }
+            treeNodeIndex += 1
+        }
+        parentNode.remove(treeNode)
+        val upNode = parentNode.getChildAt(treeNodeIndex - 1) as DefaultMutableTreeNode
+        parentNode.remove(upNode)
+        parentNode.insert(treeNode, treeNodeIndex - 1)
+        parentNode.insert(upNode, treeNodeIndex)
+
+        val itemList = lineStack?.itemList
+        var targetIndex = -1
+        if (itemList != null) {
+            for (item in itemList) {
+                if (item == userObj) {
+                    targetIndex = itemList.indexOf(item)
+                    break
+                }
+            }
+            if (targetIndex != -1) {
+                val upItem = itemList[targetIndex + 1]
+                itemList[targetIndex] = upItem
+                itemList[targetIndex + 1] = userObj
+                saveLineStack()
+                tree?.updateUI()
+            }
+        }
+    }
+
+    fun downItemTreeNode(treeNode: DefaultMutableTreeNode) {
+        val userObj = treeNode.userObject as Item
+        val parentNode: DefaultMutableTreeNode = treeNode.parent as DefaultMutableTreeNode
+        val siblingNodes = parentNode.children()
+        var treeNodeIndex = 0
+        for (siblingNode in siblingNodes) {
+            if (siblingNode == treeNode) {
+                break
+            }
+            treeNodeIndex += 1
+        }
+        val downNode = parentNode.getChildAt(treeNodeIndex + 1) as DefaultMutableTreeNode
+        parentNode.remove(treeNode)
+        parentNode.remove(downNode)
+        parentNode.insert(downNode, treeNodeIndex)
+        parentNode.insert(treeNode, treeNodeIndex + 1)
+
+        val itemList = lineStack?.itemList
+        var targetIndex = -1
+        if (itemList != null) {
+            for (item in itemList) {
+                if (item == userObj) {
+                    targetIndex = itemList.indexOf(item)
+                    break
+                }
+            }
+            if (targetIndex != -1) {
+                val downItem = itemList[targetIndex - 1]
+                itemList[targetIndex] = downItem
+                itemList[targetIndex - 1] = userObj
+                saveLineStack()
+                tree?.updateUI()
+            }
+
+        }
+
+    }
+
+    fun upLineTreeNode(treeNode: DefaultMutableTreeNode) {
+        val userObj = treeNode.userObject as Line
+        val parentNode: DefaultMutableTreeNode = treeNode.parent as DefaultMutableTreeNode
+        val siblingNodes = parentNode.children()
+        var treeNodeIndex = 0
+        for (siblingNode in siblingNodes) {
+            if (siblingNode == treeNode) {
+                break
+            }
+            treeNodeIndex += 1
+        }
+        parentNode.remove(treeNode)
+        val upNode = parentNode.getChildAt(treeNodeIndex - 1) as DefaultMutableTreeNode
+        parentNode.remove(upNode)
+        parentNode.insert(treeNode, treeNodeIndex - 1)
+        parentNode.insert(upNode, treeNodeIndex)
+
+        val itemList = lineStack?.itemList
+        var targetLineIndex = -1
+        if (itemList != null) {
+            for (item in itemList) {
+                val lineList = item.lineList
+                if (lineList != null) {
+                    for (line in lineList) {
+                        if (line == userObj) {
+                            targetLineIndex = lineList.indexOf(line)
+                            break
+                        }
+                    }
+                    if (targetLineIndex != -1) {
+                        val upLine = lineList[targetLineIndex + 1]
+                        lineList[targetLineIndex] = upLine
+                        lineList[targetLineIndex + 1] = userObj
+                        saveLineStack()
+                        tree?.updateUI()
+                        return
+                    }
+                }
+            }
+        }
+    }
+
+    fun downLineTreeNode(treeNode: DefaultMutableTreeNode) {
+        val userObj = treeNode.userObject as Line
+        val parentNode: DefaultMutableTreeNode = treeNode.parent as DefaultMutableTreeNode
+        val siblingNodes = parentNode.children()
+        var treeNodeIndex = 0
+        for (siblingNode in siblingNodes) {
+            if (siblingNode == treeNode) {
+                break
+            }
+            treeNodeIndex += 1
+        }
+        val downNode = parentNode.getChildAt(treeNodeIndex + 1) as DefaultMutableTreeNode
+        parentNode.remove(treeNode)
+        parentNode.remove(downNode)
+        parentNode.insert(downNode, treeNodeIndex)
+        parentNode.insert(treeNode, treeNodeIndex + 1)
+
+        val itemList = lineStack?.itemList
+        var targetLineIndex = -1
+        if (itemList != null) {
+            for (item in itemList) {
+                val lineList = item.lineList
+                if (lineList != null) {
+                    for (line in lineList) {
+                        if (line == userObj) {
+                            targetLineIndex = lineList.indexOf(line)
+                            break
+                        }
+                    }
+                    if (targetLineIndex != -1) {
+                        val upLine = lineList[targetLineIndex - 1]
+                        lineList[targetLineIndex] = upLine
+                        lineList[targetLineIndex - 1] = userObj
+                        saveLineStack()
+                        tree?.updateUI()
+                        return
+                    }
+                }
+            }
+        }
+    }
+
 }
