@@ -15,7 +15,16 @@
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
     this is code line stack.<br>
-    <em>most HTML tags may be used</em>
+    This plugin is used to trace your method stack<br>
+    How to use it:
+    <ul>
+    <li>
+        Add An item as Default
+    </li>
+        <li>
+        Rright click in opened document ,and choose "Add this line to Stack"
+    </li>
+    </ul>
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
@@ -26,7 +35,7 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.lane.toolWindow.MyToolWindowFactory" id="CodeLineStack"
-                    icon="AllIcons.Toolwindows.Documentation" secondary="true"/>
+                    icon="AllIcons.General.InspectionsEye" secondary="true"/>
 
     </extensions>
 
@@ -47,7 +56,7 @@
         </action>
 
         <action class="com.lane.action.MakeItemAsDefaultAction" description="Make item as Default (Action of add line will be added to this item by default)"
-                text="Make Item as Default ( Line Will Be In This Item  ) "
+                text="Make Item as Default ( Line of Code Will Be Added to This Item by Default) "
                 id="action.MakeItemAsDefaultAction">
             <add-to-group group-id="ItemActionMenu"/>
         </action>
