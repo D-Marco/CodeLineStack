@@ -29,16 +29,22 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
         if (fileEditor == null || document == null) {
             return
         }
+        if (myProjectService.getLineListByFileName(fileRelationPath) == null) {
+            return
+        }
         document.addDocumentListener(object : DocumentListener {
-            var beforeCaretNumber = 0
+            var beforeCaretNumber = -1
             private var lastLineCount = document.lineCount
             override fun beforeDocumentChange(event: DocumentEvent) {
                 val editor: Editor? = FileEditorManager.getInstance(myProjectService.project).selectedTextEditor
                 if (editor != null) {
                     val caretModel: CaretModel = editor.caretModel
                     val caretOffset = caretModel.offset
-                    val lineNumber = document.getLineNumber(caretOffset)
-                    beforeCaretNumber = lineNumber
+                    if (caretOffset <= document.textLength) {
+                        val lineNumber = document.getLineNumber(caretOffset)
+                        beforeCaretNumber = lineNumber
+                    }
+
                 }
                 super.beforeDocumentChange(event)
             }
@@ -57,7 +63,7 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
                     lastLineCount = currentLineCount
                     val showBeRemoveLineList: ArrayList<Line> = ArrayList()
                     for (line in lineList) {
-                        if (beforeCaretNumber < line.selectionLine) {
+                        if (beforeCaretNumber < line.selectionLine && beforeCaretNumber > -1) {
                             line.selectionLine += insertedLines
                             myProjectService.updateTree()
                         } else if (beforeCaretNumber == line.selectionLine && insertedLines < 0) {
