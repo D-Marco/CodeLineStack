@@ -45,14 +45,15 @@
         <!--            <keyboard-shortcut first-keystroke="control shift o" keymap="$default"/>-->
         <!--        </action>-->
 
-        <group id="commonActionMenu"/>
+        <group id="titleActionMenu"/>
         <group id="ItemActionMenu"/>
         <group id="lineActionMenu"/>
+        <group id="additionalGearActions"/>
 
         <action class="com.lane.action.AddItemAction" description="Add item" text="Add Item" id="action.AddItemAction"
                 icon="AllIcons.Actions.AddList">
             <keyboard-shortcut first-keystroke="alt INSERT" keymap="$default"/>
-            <add-to-group group-id="commonActionMenu"/>
+            <add-to-group group-id="titleActionMenu"/>
         </action>
 
         <action class="com.lane.action.MakeItemAsDefaultAction" description="Make item as Default (Action of add line will be added to this item by default)"
@@ -128,6 +129,19 @@
                 id="action.MoveDownLineAction">
             <add-to-group group-id="lineActionMenu"/>
             <keyboard-shortcut first-keystroke="ctrl alt DOWN" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.ShowLineIndexAction"
+                text="Show Line Index"
+                icon="AllIcons.Actions.Checked"
+                id="action.ShowLineIndexAction">
+            <add-to-group group-id="additionalGearActions"/>
+        </action>
+        <action class="com.lane.action.ShowClassNameAction"
+                text="Show Class Name"
+                icon="AllIcons.Actions.Checked"
+                id="action.ShowClassNameAction">
+            <add-to-group group-id="additionalGearActions"/>
         </action>
     </actions>
 

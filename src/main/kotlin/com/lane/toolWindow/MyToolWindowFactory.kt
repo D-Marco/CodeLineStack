@@ -16,6 +16,7 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
 import com.lane.dataBeans.Item
 import com.lane.dataBeans.Line
+import com.lane.dataBeans.LineStack
 import com.lane.services.MyProjectService
 import java.awt.Component
 import java.awt.event.MouseAdapter
@@ -43,9 +44,17 @@ class MyToolWindowFactory : ToolWindowFactory {
         val myProjectService = toolWindow.project.service<MyProjectService>()
         myProjectService.initData(myToolWindow.getTree())
 
+
         //添加菜单栏
-        val group = ActionManager.getInstance().getAction("commonActionMenu") as ActionGroup
-        toolWindow.setTitleActions(group.getChildren(null).toMutableList())
+        val titleActionMenuActionGroup = ActionManager.getInstance().getAction("titleActionMenu") as ActionGroup
+        toolWindow.setTitleActions(titleActionMenuActionGroup.getChildren(null).toMutableList())
+
+        //可选菜单栏
+        val additionalGearActionGroup = ActionManager.getInstance().getAction("additionalGearActions") as ActionGroup
+        toolWindow.setAdditionalGearActions(additionalGearActionGroup)
+
+        val additionalGearActionGroup1 = ActionManager.getInstance().getAction("additionalGearActions")
+
 
     }
 
@@ -106,7 +115,8 @@ class MyToolWindowFactory : ToolWindowFactory {
                 val userObj = selectedNode.userObject
                 when (userObj) {
                     is Item -> {
-                        val group: DefaultActionGroup = ActionManager.getInstance().getAction("ItemActionMenu") as DefaultActionGroup
+                        val group: DefaultActionGroup =
+                            ActionManager.getInstance().getAction("ItemActionMenu") as DefaultActionGroup
                         group.remove(ActionManager.getInstance().getAction("action.MoveUpItemAction"))
                         group.remove(ActionManager.getInstance().getAction("action.MoveDownItemAction"))
                         if (firstChildOfParent != selectedNode) {
@@ -150,13 +160,20 @@ class MyToolWindowFactory : ToolWindowFactory {
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus) as JLabel
             if (value != null) {
                 val treeNode = value as DefaultMutableTreeNode
+
                 when (val nodeUserObj = treeNode.userObject) {
                     is Line -> {
-                        nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmark.svg", javaClass)
-                        val fileName = nodeUserObj.fileName
+                        val rootNode = (tree as Tree).model.root as DefaultMutableTreeNode
+                        val rootUserObj = rootNode.userObject as LineStack
+                        val parentNode = treeNode.parent
+                        val currentIndexOfParent = parentNode.getIndex(treeNode)
+                        val reverseIndex =
+                            if (rootUserObj.showLineIndexNumber) ((parentNode.childCount - currentIndexOfParent).toString()+": ") else ""
+                        val fileName = if (rootUserObj.showClassName) ("[" + nodeUserObj.fileName + "]") else ""
                         val text = nodeUserObj.text
-                        nodeLabel.text = "<html><font color='#ffffff'>[$fileName]</font> $text</html>"
+                        nodeLabel.text = "<html><font color='#ffffff'>$reverseIndex$fileName</font> $text</html>"
                         nodeLabel.toolTipText = nodeUserObj.describe
+                        nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmark.svg", javaClass)
 
                     }
 

@@ -61,11 +61,12 @@ class MyProjectService(val project: Project) {
         if (!storeFile.exists()) {
             storeFile.createNewFile()
             storeFile.writeText(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + "<lineStack >\n" + "</lineStack>", Charsets.UTF_8
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                        "<lineStack defaultItemId=\"item2Id\" showClassName=\"true\" showLineIndexNumber=\"true\">\n" +
+                        "</lineStack>", Charsets.UTF_8
             )
         }
         thisLogger().info(MyBundle.message("projectService", project.name))
-        thisLogger().warn("Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`.")
     }
 
     private fun initLineMap() {
@@ -126,6 +127,7 @@ class MyProjectService(val project: Project) {
     private fun renderTree() {
         val itemList = lineStack?.itemList
         treeRoot?.removeAllChildren()
+        treeRoot?.userObject = lineStack
         if (itemList != null) {
             for (item in itemList) {
                 addItemNode(item)
@@ -257,6 +259,24 @@ class MyProjectService(val project: Project) {
             }
         }
         return false
+    }
+
+    fun showLineIndexNumberValue(): Boolean {
+        return lineStack!!.showLineIndexNumber
+    }
+
+    fun switchLineIndexNumberValue() {
+        lineStack?.showLineIndexNumber = !(lineStack?.showLineIndexNumber)!!
+        saveLineStack()
+    }
+
+    fun showClassNameValue(): Boolean {
+        return lineStack!!.showClassName
+    }
+
+    fun switchShowClassNameValue() {
+        lineStack?.showClassName = !(lineStack?.showClassName)!!
+        saveLineStack()
     }
 
     fun addLineToDefaultItem(line: Line) {
