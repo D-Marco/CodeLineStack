@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 import javax.swing.tree.TreeNode
+import javax.swing.tree.TreePath
 import javax.xml.bind.JAXBContext
 
 @Service(Service.Level.PROJECT)
@@ -275,17 +276,21 @@ class MyProjectService(val project: Project) {
 
     fun expandRowAll() {
         val itemList = lineStack?.itemList
-        val itemSize = itemList?.size
-        for (i in 1..itemSize!!) {
-            tree?.expandRow(i - 1)
+        val itemNodeList: Enumeration<TreeNode>? = treeRoot?.children()
+        if (itemNodeList != null) {
+            for (itemNode in itemNodeList) {
+                tree?.expandPath(TreePath((itemNode as DefaultMutableTreeNode).path));
+            }
         }
     }
 
     fun collapseRowAll() {
         val itemList = lineStack?.itemList
-        val itemSize = itemList?.size
-        for (i in 0..itemSize!!-1) {
-            tree?.collapseRow(i-1)
+        val itemNodeList: Enumeration<TreeNode>? = treeRoot?.children()
+        if (itemNodeList != null) {
+            for (itemNode in itemNodeList) {
+                tree?.collapsePath(TreePath((itemNode as DefaultMutableTreeNode).path));
+            }
         }
     }
 

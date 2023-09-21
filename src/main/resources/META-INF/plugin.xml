@@ -57,7 +57,7 @@
         </action>
         <action class="com.lane.action.ExpandAction"
                 text="Show Class Name"
-                icon="AllIcons.General.ExpandComponentHover"
+                icon="AllIcons.Actions.Expandall"
                 id="action.ExpandAction">
             <add-to-group group-id="titleActionMenu"/>
         </action>
