@@ -7,13 +7,14 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.MarkupModel
+import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.lane.dataBeans.Line
 import com.lane.services.MyProjectService
 import java.util.*
-import javax.swing.event.DocumentEvent
-import javax.swing.event.DocumentListener
 
 
 class AddLineAction : AnAction() {
@@ -47,13 +48,16 @@ class AddLineAction : AnAction() {
 
                     if (myProjectService.existDefaultItem()) {
                         myProjectService.addLineToDefaultItem(line)
+                        val markupModel: MarkupModel = editor.markupModel
+                        val rangeHighlighter: RangeHighlighter = markupModel.addLineHighlighter(lineNum, HighlighterLayer.ERROR, null)
+
                     }
                 }
             }
         }
     }
 
-    fun showNotExistDefaultItemTip(project: Project, pluginId: String) {
+    private fun showNotExistDefaultItemTip(project: Project, pluginId: String) {
         val title = "CodeLineStack"
         val content = "The default item has not been set yet"
 
