@@ -178,6 +178,7 @@ class MyToolWindowFactory : ToolWindowFactory {
                     }
 
                     is Item -> {
+
                         nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmarksList.svg", javaClass)
                         val name = nodeUserObj.name
                         if (defaultItem != null && defaultItem.id == nodeUserObj.id) {

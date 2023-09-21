@@ -41,7 +41,6 @@ class MyProjectService(val project: Project) {
         this.tree = tree
         this.treeModel = tree.model as DefaultTreeModel
         this.treeRoot = treeModel!!.root as DefaultMutableTreeNode
-
         lineStack = getLineStack()
         initLineMap()
         renderTree()
@@ -272,6 +271,22 @@ class MyProjectService(val project: Project) {
 
     fun showClassNameValue(): Boolean {
         return lineStack!!.showClassName
+    }
+
+    fun expandRowAll() {
+        val itemList = lineStack?.itemList
+        val itemSize = itemList?.size
+        for (i in 1..itemSize!!) {
+            tree?.expandRow(i - 1)
+        }
+    }
+
+    fun collapseRowAll() {
+        val itemList = lineStack?.itemList
+        val itemSize = itemList?.size
+        for (i in 0..itemSize!!-1) {
+            tree?.collapseRow(i-1)
+        }
     }
 
     fun switchShowClassNameValue() {

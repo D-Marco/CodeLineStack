@@ -55,21 +55,34 @@
             <keyboard-shortcut first-keystroke="alt INSERT" keymap="$default"/>
             <add-to-group group-id="titleActionMenu"/>
         </action>
+        <action class="com.lane.action.ExpandAction"
+                text="Show Class Name"
+                icon="AllIcons.General.ExpandComponentHover"
+                id="action.ExpandAction">
+            <add-to-group group-id="titleActionMenu"/>
+        </action>
+        <action class="com.lane.action.CollapseAction"
+                text="Show Class Name"
+                icon="AllIcons.Actions.Collapseall"
+                id="action.CollapseAction">
+            <add-to-group group-id="titleActionMenu"/>
+        </action>
 
-        <action class="com.lane.action.MakeItemAsDefaultAction" description="Make item as Default (Action of add line will be added to this item by default)"
+        <action class="com.lane.action.MakeItemAsDefaultAction"
+                description="Make item as Default (Action of add line will be added to this item by default)"
                 text="Make Item as Default ( Line of Code Will Be Added to This Item by Default) "
                 id="action.MakeItemAsDefaultAction">
             <add-to-group group-id="ItemActionMenu"/>
         </action>
 
-        <action class="com.lane.action.DeleteItemOrLineAction"  text="Delete This Item"
+        <action class="com.lane.action.DeleteItemOrLineAction" text="Delete This Item"
                 id="action.DeleteItemAction"
                 icon="AllIcons.Actions.DeleteTagHover">
             <add-to-group group-id="ItemActionMenu"/>
             <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
         </action>
 
-        <action class="com.lane.action.EditItemOrLineAction"  text="Rename This Item Describe"
+        <action class="com.lane.action.EditItemOrLineAction" text="Rename This Item Describe"
                 id="action.EditItemAction"
                 icon="AllIcons.Actions.Edit">
             <add-to-group group-id="ItemActionMenu"/>
@@ -143,12 +156,14 @@
                 id="action.ShowClassNameAction">
             <add-to-group group-id="additionalGearActions"/>
         </action>
+
     </actions>
 
 
     <applicationListeners>
         <listener class="com.lane.listeners.MyApplicationActivationListener"
                   topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-        <listener class="com.lane.listeners.MyFileEditorManagerListener" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+        <listener class="com.lane.listeners.MyFileEditorManagerListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
 </idea-plugin>
