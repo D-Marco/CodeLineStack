@@ -1,5 +1,6 @@
 package com.lane.action
 
+import com.intellij.icons.AllIcons
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -7,14 +8,18 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.MarkupModel
-import com.intellij.openapi.editor.markup.RangeHighlighter
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.ui.JBColor
+import com.lane.dataBeans.Item
 import com.lane.dataBeans.Line
 import com.lane.services.MyProjectService
 import java.util.*
+import javax.swing.Icon
 
 
 class AddLineAction : AnAction() {
@@ -48,8 +53,35 @@ class AddLineAction : AnAction() {
 
                     if (myProjectService.existDefaultItem()) {
                         myProjectService.addLineToDefaultItem(line)
+                        val defaultItem: Item? = myProjectService.getDefaultItem()
+
+//                        val textAttributes: TextAttributes?
+//                        textAttributes = TextAttributes()
+//                        textAttributes.backgroundColor = JBColor.RED
+//                        textAttributes.errorStripeColor = JBColor.RED
                         val markupModel: MarkupModel = editor.markupModel
-                        val rangeHighlighter: RangeHighlighter = markupModel.addLineHighlighter(lineNum, HighlighterLayer.ERROR, null)
+                        val highlightIcon = AllIcons.Actions.Checked
+                        val highlighter =
+                            markupModel.addLineHighlighter(lineNum, HighlighterLayer.SYNTAX, null)
+                        highlighter.gutterIconRenderer = object : GutterIconRenderer() {
+                            override fun equals(obj: Any?): Boolean {
+                                return false
+                            }
+
+                            override fun hashCode(): Int {
+                                return 0
+                            }
+
+                            override fun getIcon(): Icon {
+                                return highlightIcon
+                            }
+
+                            override fun getTooltipText(): String {
+                                val step = defaultItem?.lineList?.size
+                                val itemName = defaultItem?.name
+                                return step.toString() + " step in " + itemName
+                            }
+                        }
 
                     }
                 }

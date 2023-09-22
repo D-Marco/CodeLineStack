@@ -24,7 +24,5 @@ class ShowLineIndexAction : AnAction() {
             val showLineIndexNumber = myProjectService.showLineIndexNumberValue()
             e.presentation.icon = if (showLineIndexNumber) AllIcons.Actions.Checked else null
         }
-
-
     }
 }

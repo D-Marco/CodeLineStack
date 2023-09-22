@@ -12,6 +12,7 @@ import com.lane.MyBundle
 import com.lane.dataBeans.Item
 import com.lane.dataBeans.Line
 import com.lane.dataBeans.LineStack
+import com.lane.dataBeans.LineWithItem
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileReader
@@ -36,7 +37,7 @@ class MyProjectService(val project: Project) {
     private var lineStack: LineStack? = null
 
     //以文件路径为key
-    private var lineMap: ConcurrentHashMap<String, ArrayList<Line>> = ConcurrentHashMap()
+    private var lineMap: ConcurrentHashMap<String, ArrayList<LineWithItem>> = ConcurrentHashMap()
 
     fun initData(tree: Tree) {
         this.tree = tree
@@ -81,7 +82,7 @@ class MyProjectService(val project: Project) {
                         if (lineListFromMap == null) {
                             lineMap[line.fileRelativePath] = ArrayList()
                         }
-                        lineMap[line.fileRelativePath]?.add(line)
+                        lineMap[line.fileRelativePath]?.add(LineWithItem(line, item))
 
                     }
                 }
@@ -321,7 +322,7 @@ class MyProjectService(val project: Project) {
             if (lineListFrmMap == null) {
                 lineMap[line.fileRelativePath] = ArrayList()
             }
-            lineMap[line.fileRelativePath]?.add(line)
+            lineMap[line.fileRelativePath]?.add(LineWithItem(line, defaultItem!!))
 
 
             val targetItem = getItemTreeNodeByItemId(defaultItem!!.id)
@@ -348,7 +349,7 @@ class MyProjectService(val project: Project) {
                     }
                     if (targetLine != null) {
                         lineList.remove(targetLine)
-                        lineMap[targetLine.fileRelativePath]?.remove(targetLine)
+                        lineMap[targetLine.fileRelativePath]?.remove(LineWithItem(targetLine,null))
                         break
                     }
 
@@ -356,10 +357,12 @@ class MyProjectService(val project: Project) {
             }
         }
         saveLineStack()
+        if (lineNode.parent != null) {
+            val itemNode: DefaultMutableTreeNode = lineNode.parent as DefaultMutableTreeNode
+            itemNode.remove(lineNode)
+            tree?.updateUI()
+        }
 
-        val itemNode: DefaultMutableTreeNode = lineNode.parent as DefaultMutableTreeNode
-        itemNode.remove(lineNode)
-        tree?.updateUI()
     }
 
     fun deleteLine(lineId: String) {
@@ -431,7 +434,7 @@ class MyProjectService(val project: Project) {
         saveLineStack()
     }
 
-    fun getLineListByFileName(filePath: String): ArrayList<Line>? {
+    fun getLineListByFileName(filePath: String): ArrayList<LineWithItem>? {
         return lineMap[filePath]
     }
 

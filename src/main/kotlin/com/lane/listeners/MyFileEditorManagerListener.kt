@@ -13,6 +13,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.lane.dataBeans.Line
+import com.lane.dataBeans.LineWithItem
 import com.lane.services.MyProjectService
 import java.util.ArrayList
 
@@ -51,28 +52,34 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
             override fun documentChanged(event: DocumentEvent) {
                 super.documentChanged(event)
-                val lineList: ArrayList<Line>? = myProjectService.getLineListByFileName(fileRelationPath)
+                val lineWithItemList: ArrayList<LineWithItem>? = myProjectService.getLineListByFileName(fileRelationPath)
 
-                if (lineList != null) {
+                if (lineWithItemList != null) {
                     val currentLineCount = document.lineCount
                     val offset = event.offset
-//                    val lineNumber = document.getLineNumber(offset)
-//                    println("lineNumber :$lineNumber  beforelinenumber:$beforeCaretNumber")
+                    val lineNumber = document.getLineNumber(offset)
+                    println("lineNumber :$lineNumber  beforelinenumber:$beforeCaretNumber")
                     val insertedLines: Int = currentLineCount - lastLineCount
-//                    println("插入了 $insertedLines 行")
+                    println("插入了 $insertedLines 行")
                     lastLineCount = currentLineCount
-                    val showBeRemoveLineList: ArrayList<Line> = ArrayList()
-                    for (line in lineList) {
-                        if (beforeCaretNumber < line.selectionLine && beforeCaretNumber > -1) {
-                            line.selectionLine += insertedLines
+                    val showBeRemoveLineList: ArrayList<LineWithItem> = ArrayList()
+                    for (lineWithItem in lineWithItemList) {
+                        if (insertedLines > 0) {//插入
+
+                        }else if (insertedLines < 0) {//删除
+
+                        }
+
+                        if (beforeCaretNumber < lineWithItem.line.selectionLine && beforeCaretNumber > -1) {
+                            lineWithItem.line.selectionLine += insertedLines
                             myProjectService.updateTree()
-                        } else if (beforeCaretNumber == line.selectionLine && insertedLines < 0) {
-                            myProjectService.deleteLine(line.id)
-                            showBeRemoveLineList.add(line)
+                        } else if (beforeCaretNumber == lineWithItem.line.selectionLine && insertedLines < 0) {
+                            myProjectService.deleteLine(lineWithItem.line.id)
+                            showBeRemoveLineList.add(LineWithItem(lineWithItem.line,null))
                         }
                     }
                     if (showBeRemoveLineList.size > 0) {
-                        lineList.removeAll(showBeRemoveLineList.toSet())
+                        lineWithItemList.removeAll(showBeRemoveLineList.toSet())
                     }
                     myProjectService.saveLineStack()
                 }

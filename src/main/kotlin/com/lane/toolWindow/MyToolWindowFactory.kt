@@ -109,6 +109,9 @@ class MyToolWindowFactory : ToolWindowFactory {
             if (e != null && e.button == MouseEvent.BUTTON3) {
                 val tree = e.component as Tree
                 val selectedNode = tree.lastSelectedPathComponent as DefaultMutableTreeNode
+                if (selectedNode.parent == null) {
+                    return
+                }
                 val firstChildOfParent = selectedNode.parent.getChildAt(0)
                 val lastChildOfParent = (selectedNode.parent as DefaultMutableTreeNode).lastChild
 
