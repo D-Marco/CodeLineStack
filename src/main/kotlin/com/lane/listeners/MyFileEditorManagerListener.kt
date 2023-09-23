@@ -1,28 +1,72 @@
 package com.lane.listeners
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.CaretModel
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
-import com.lane.dataBeans.Line
 import com.lane.dataBeans.LineWithItem
 import com.lane.services.MyProjectService
-import java.util.ArrayList
+import com.lane.util.MyGutterIconRenderer
+import com.lane.util.UtilData
 
 
 class MyFileEditorManagerListener : FileEditorManagerListener {
+
+
+    companion object {
+        //添加左侧眼睛
+        fun updateEyeState(myProjectService: MyProjectService, fileRelationPath: String, textEditor: Editor) {
+            val allRelLineWithItemList = myProjectService.getLineWithItemListByFileName(fileRelationPath) ?: return
+            for (it in allRelLineWithItemList) {
+                var breakOut = false
+                val line = it.line
+                val markupModel: MarkupModel = textEditor.markupModel
+                val allHighLighters = markupModel.allHighlighters
+                for (itLighter in allHighLighters) {
+                    val value = itLighter.getUserData(UtilData.HigherKey)
+                    if (value != null && value == line.selectionLine) {
+                        breakOut = true
+                    }
+                }
+                if (breakOut) {
+                    continue
+                }
+                val highlighter = markupModel.addLineHighlighter(line.selectionLine, HighlighterLayer.SYNTAX, null)
+                highlighter.putUserData(UtilData.HigherKey, line.selectionLine)
+                highlighter.gutterIconRenderer = MyGutterIconRenderer(myProjectService, line.fileRelativePath, line.selectionLine)
+            }
+        }
+    }
+
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
-        super.fileOpened(source, file)
         val openProjects: Array<Project> = ProjectManager.getInstance().openProjects
         val myProjectService = openProjects[0].service<MyProjectService>()
+        super.fileOpened(source, file)
+        val editors = source.getEditors(file)
+        if (editors.isEmpty()) {
+            return
+        }
+        for (editor in editors) {
+            if (editor is TextEditor) {
+                val textEditor: Editor = editor.editor
+                textEditor.markupModel
+                // 在这里使用textEditor对象，它是Editor类型的对象
+            }
+        }
+        val textEditor: Editor = (editors[0] as TextEditor).editor
+
+
         val fileEditor = source.getSelectedEditor(file)
         val basePath = myProjectService.project.basePath
         val fileRelationPath = file.path.substring(basePath!!.length + 1)
@@ -30,61 +74,157 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
         if (fileEditor == null || document == null) {
             return
         }
-        if (myProjectService.getLineListByFileName(fileRelationPath) == null) {
-            return
-        }
-        document.addDocumentListener(object : DocumentListener {
-            var beforeCaretNumber = -1
-            private var lastLineCount = document.lineCount
-            override fun beforeDocumentChange(event: DocumentEvent) {
-                val editor: Editor? = FileEditorManager.getInstance(myProjectService.project).selectedTextEditor
-                if (editor != null) {
-                    val caretModel: CaretModel = editor.caretModel
-                    val caretOffset = caretModel.offset
-                    if (caretOffset <= document.textLength) {
-                        val lineNumber = document.getLineNumber(caretOffset)
-                        beforeCaretNumber = lineNumber
-                    }
+        updateEyeState(myProjectService, fileRelationPath, textEditor)
 
-                }
-                super.beforeDocumentChange(event)
-            }
-
-            override fun documentChanged(event: DocumentEvent) {
-                super.documentChanged(event)
-                val lineWithItemList: ArrayList<LineWithItem>? = myProjectService.getLineListByFileName(fileRelationPath)
-
-                if (lineWithItemList != null) {
-                    val currentLineCount = document.lineCount
-                    val offset = event.offset
-                    val lineNumber = document.getLineNumber(offset)
-                    println("lineNumber :$lineNumber  beforelinenumber:$beforeCaretNumber")
-                    val insertedLines: Int = currentLineCount - lastLineCount
-                    println("插入了 $insertedLines 行")
-                    lastLineCount = currentLineCount
-                    val showBeRemoveLineList: ArrayList<LineWithItem> = ArrayList()
-                    for (lineWithItem in lineWithItemList) {
-                        if (insertedLines > 0) {//插入
-
-                        }else if (insertedLines < 0) {//删除
-
-                        }
-
-                        if (beforeCaretNumber < lineWithItem.line.selectionLine && beforeCaretNumber > -1) {
-                            lineWithItem.line.selectionLine += insertedLines
-                            myProjectService.updateTree()
-                        } else if (beforeCaretNumber == lineWithItem.line.selectionLine && insertedLines < 0) {
-                            myProjectService.deleteLine(lineWithItem.line.id)
-                            showBeRemoveLineList.add(LineWithItem(lineWithItem.line,null))
-                        }
-                    }
-                    if (showBeRemoveLineList.size > 0) {
-                        lineWithItemList.removeAll(showBeRemoveLineList.toSet())
-                    }
-                    myProjectService.saveLineStack()
-                }
-            }
-
-        }, fileEditor)
+        document.addDocumentListener(MyDocumentListener(myProjectService, document, fileRelationPath, textEditor), fileEditor)
     }
+
+    class MyDocumentListener(
+        var myProjectService: MyProjectService, private var document: Document,
+        private var fileRelationPath: String,
+        private var editor: Editor
+    ) : DocumentListener {
+        //            var beforeCaretNumber = -1
+        var lastLineCount = 0
+        var lastDocumentText = ""
+
+        override fun beforeDocumentChange(event: DocumentEvent) {
+            lastDocumentText = document.text
+            lastLineCount = document.lineCount
+        }
+
+        override fun documentChanged(event: DocumentEvent) {
+            val newDocumentText = document.text
+            val lineWithItemList: ArrayList<LineWithItem>? = myProjectService.getLineWithItemListByFileName(fileRelationPath)
+            var hasChange = false
+            if (lineWithItemList != null) {
+                val insertedLines = document.lineCount - lastLineCount
+                val showBeRemoveLineWithItemList: ArrayList<LineWithItem> = ArrayList()
+                for (lineWithItem in lineWithItemList) {
+                    val targetLineNumber = lineWithItem.line.selectionLine
+                    if (insertedLines != 0) {
+                        val hasChangeBefore = textHasChangeBeforeLine(targetLineNumber, lastDocumentText, newDocumentText)
+                        val hasChangeAfter = textHasChangeAfterLine(targetLineNumber, lastDocumentText, newDocumentText)
+                        if (hasChangeBefore) {
+                            hasChange = if (!hasChangeAfter) {
+                                if (getTextByLineNumber(targetLineNumber + insertedLines, newDocumentText) == lineWithItem.line.text) {
+                                    addOrSubLine(lineWithItem, insertedLines)
+                                    true
+                                } else {
+                                    removeLine(lineWithItem.line.id)
+                                    showBeRemoveLineWithItemList.add(lineWithItem)
+                                    true
+                                }
+                            } else {
+                                removeLine(lineWithItem.line.id)
+                                showBeRemoveLineWithItemList.add(lineWithItem)
+                                true
+                            }
+                        } else {
+                            if (hasChangeAfter) {
+                                if (getTextByLineNumber(targetLineNumber, newDocumentText) != lineWithItem.line.text) {
+                                    removeLine(lineWithItem.line.id)
+                                    showBeRemoveLineWithItemList.add(lineWithItem)
+                                    hasChange = true
+                                }
+                            } else {
+                                if (getTextByLineNumber(targetLineNumber, newDocumentText) != lineWithItem.line.text) {
+                                    removeLine(lineWithItem.line.id)
+                                    showBeRemoveLineWithItemList.add(lineWithItem)
+                                    hasChange = true
+                                }
+
+                            }
+//                                if (getTextByLineNumber(targetLineNumber + insertedLines, newDocumentText) != lineWithItem.line.text) {
+//                                    removeLine(lineWithItem.line.id)
+//                                    showBeRemoveLineWithItemList.add(lineWithItem)
+//                                }
+
+                        }
+                    } else {
+//                            if (getTextByLineNumber(targetLineNumber, newDocumentText) != lineWithItem.line.text) {
+//                                removeLine(lineWithItem.line.id, myProjectService)
+//                                showBeRemoveLineWithItemList.add(lineWithItem)
+//                            }
+                    }
+
+                }
+                if (showBeRemoveLineWithItemList.size > 0) {
+                    lineWithItemList.removeAll(showBeRemoveLineWithItemList.toSet())
+                    hasChange = true
+                }
+                if (hasChange) {
+                    myProjectService.saveLineStack()
+                    updateEyeState(myProjectService, fileRelationPath, editor)
+                }
+
+            }
+
+        }
+
+        private fun textHasChangeAfterLine(targetLine: Int, oldText: String, newText: String): Boolean {
+// 将文本按行拆分成数组
+            val oldLines = oldText.split("\n")
+            val newLines = newText.split("\n")
+
+            val oldLinesSize = oldLines.size
+            val newLineSize = newLines.size
+
+            // 检查行数是否合法
+            if (targetLine < 0 || targetLine >= oldLinesSize) {
+                throw IllegalArgumentException("目标行数无效")
+            }
+            val totalLine = oldLinesSize - targetLine - 1
+            var i = 1
+            while (i < totalLine + 1) {
+                if (oldLines[oldLinesSize - i] != newLines[newLineSize - i]) {
+                    return true
+                }
+                i++
+            }
+            return false // 所有行都相同，返回 false
+        }
+
+        private fun textHasChangeBeforeLine(targetLine: Int, oldText: String, newText: String): Boolean {
+// 将文本按行拆分成数组
+            val oldLines = oldText.split("\n")
+            val newLines = newText.split("\n")
+            val newLinesSize = newLines.size
+            // 检查行数是否合法
+            if (targetLine < 0 || targetLine >= oldLines.size) {
+                throw IllegalArgumentException("目标行数无效")
+            }
+            if (targetLine == newLinesSize) {
+                return true
+            }
+            var i = 0
+            while (i < targetLine) {
+                if (i >= newLinesSize) {
+                    return true
+                }
+                if (oldLines[i] != newLines[i]) {
+                    return true
+                }
+                i++
+            }
+            return false // 所有行都相同，返回 false
+        }
+
+        private fun getTextByLineNumber(targetLine: Int, text: String): String {
+            val textLines = text.split("\n")
+            return textLines[targetLine]
+        }
+
+        fun removeLine(lineId: String) {
+            myProjectService.deleteLine(lineId)
+        }
+
+        private fun addOrSubLine(lineWithItem: LineWithItem, insertedLines: Int) {
+            lineWithItem.line.selectionLine += insertedLines
+            myProjectService.updateTree()
+        }
+
+    }
+
+
 }

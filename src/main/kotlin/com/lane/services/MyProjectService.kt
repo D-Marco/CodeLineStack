@@ -349,7 +349,7 @@ class MyProjectService(val project: Project) {
                     }
                     if (targetLine != null) {
                         lineList.remove(targetLine)
-                        lineMap[targetLine.fileRelativePath]?.remove(LineWithItem(targetLine,null))
+                        lineMap[targetLine.fileRelativePath]?.remove(LineWithItem(targetLine, null))
                         break
                     }
 
@@ -434,8 +434,14 @@ class MyProjectService(val project: Project) {
         saveLineStack()
     }
 
-    fun getLineListByFileName(filePath: String): ArrayList<LineWithItem>? {
+    fun getLineWithItemListByFileName(filePath: String): ArrayList<LineWithItem>? {
         return lineMap[filePath]
+    }
+
+    fun getLineWithItemListByFileNameAndLineNumber(filePath: String, lineNumber: Int): ArrayList<LineWithItem>? {
+        val result: ArrayList<LineWithItem>? = lineMap[filePath]
+        result?.filter { it.line.selectionLine != lineNumber }
+        return result
     }
 
     fun updateTree() {

@@ -11,18 +11,21 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.MarkupModel
-import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
-import com.intellij.ui.JBColor
 import com.lane.dataBeans.Item
 import com.lane.dataBeans.Line
+import com.lane.listeners.MyFileEditorManagerListener
 import com.lane.services.MyProjectService
+import com.lane.util.MyGutterIconRenderer
+import com.lane.util.UtilData
 import java.util.*
 import javax.swing.Icon
 
 
 class AddLineAction : AnAction() {
+
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project
         val myProjectService = project?.service<MyProjectService>()
@@ -53,36 +56,13 @@ class AddLineAction : AnAction() {
 
                     if (myProjectService.existDefaultItem()) {
                         myProjectService.addLineToDefaultItem(line)
-                        val defaultItem: Item? = myProjectService.getDefaultItem()
 
+                        val defaultItem: Item? = myProjectService.getDefaultItem()
 //                        val textAttributes: TextAttributes?
 //                        textAttributes = TextAttributes()
 //                        textAttributes.backgroundColor = JBColor.RED
 //                        textAttributes.errorStripeColor = JBColor.RED
-                        val markupModel: MarkupModel = editor.markupModel
-                        val highlightIcon = AllIcons.Actions.Checked
-                        val highlighter =
-                            markupModel.addLineHighlighter(lineNum, HighlighterLayer.SYNTAX, null)
-                        highlighter.gutterIconRenderer = object : GutterIconRenderer() {
-                            override fun equals(obj: Any?): Boolean {
-                                return false
-                            }
-
-                            override fun hashCode(): Int {
-                                return 0
-                            }
-
-                            override fun getIcon(): Icon {
-                                return highlightIcon
-                            }
-
-                            override fun getTooltipText(): String {
-                                val step = defaultItem?.lineList?.size
-                                val itemName = defaultItem?.name
-                                return step.toString() + " step in " + itemName
-                            }
-                        }
-
+                        MyFileEditorManagerListener.updateEyeState(myProjectService, filePath, editor)
                     }
                 }
             }
@@ -94,10 +74,7 @@ class AddLineAction : AnAction() {
         val content = "The default item has not been set yet"
 
         val notification = Notification(
-            pluginId,
-            title,
-            content,
-            NotificationType.WARNING
+            pluginId, title, content, NotificationType.WARNING
         )
 
         Notifications.Bus.notify(notification, project)
