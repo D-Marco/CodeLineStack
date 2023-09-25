@@ -58,18 +58,23 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
             }
         }
 
-        fun removeHighlighter(myProjectService: MyProjectService, lineNumber: Int, textEditor: Editor?) {
+        fun removeHighlighter(lineNumber: Int, textEditor: Editor?) {
             if (textEditor == null) {
                 return
             }
             val markupModel: MarkupModel = textEditor.markupModel
             val allHighLighters = markupModel.allHighlighters
-            for (itLighter in allHighLighters) {
-                val value = itLighter.getUserData(UtilData.HigherKey)
-                if (value != null && value == lineNumber) {
-                    markupModel.removeHighlighter(itLighter)
-                    break
+            if (allHighLighters.isEmpty()) {
+                markupModel.removeAllHighlighters()
+            } else {
+                for (itLighter in allHighLighters) {
+                    val value = itLighter.getUserData(UtilData.HigherKey)
+                    if (value != null && value == lineNumber) {
+                        markupModel.removeHighlighter(itLighter)
+                        break
+                    }
                 }
+
             }
         }
 

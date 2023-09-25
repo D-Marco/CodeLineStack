@@ -27,7 +27,6 @@ class DeleteItemOrLineAction : AnAction() {
                             )
                             if (lineWithItemArray != null && lineWithItemArray.size == 1) {
                                 MyFileEditorManagerListener.removeHighlighter(
-                                    myProjectService,
                                     it.selectionLine,
                                     editor
                                 )
@@ -46,7 +45,6 @@ class DeleteItemOrLineAction : AnAction() {
                         )?.size!! < 1
                     ) {
                         MyFileEditorManagerListener.removeHighlighter(
-                            myProjectService,
                             userObj.selectionLine,
                             editor
                         )

@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<lineStack defaultItemId="49ee153b-f86e-4eec-abe5-4ad103f8d8a2" showLineIndexNumber="true" showClassName="true">
-    <item id="49509d4e-dc12-4dad-a3d1-aab828c1ebb0" name="F2">
-        <line describe="" text="    override fun actionPerformed(e: AnActionEvent) {" id="9cdac468-2de8-4269-aeba-1b3556f79c67" fileRelativePath="src/main/kotlin/com/lane/action/AddItemAction.kt" selectionLine="11" fileName="AddItemAction.kt"/>
-    </item>
-    <item id="373204af-e834-4104-9ad4-f0b7184bcf34" name="充三"/>
+<lineStack defaultItemId="b8cce778-2717-4fae-89bf-51643a29d473" showLineIndexNumber="true" showClassName="true">
+    <item id="645228ed-fdf7-4479-b5ef-bf5681454239" name="11"/>
 </lineStack>
