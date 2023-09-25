@@ -427,7 +427,6 @@ class MyProjectService(val project: Project) {
                     for (line in lineList) {
                         if (line.id == selectedLineId) {
                             line.describe = newDesc
-                            println("fff")
                             break
                         }
                     }

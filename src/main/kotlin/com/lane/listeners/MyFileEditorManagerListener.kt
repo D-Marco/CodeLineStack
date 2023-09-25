@@ -183,10 +183,15 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
                         }
                     } else {
-//                            if (getTextByLineNumber(targetLineNumber, newDocumentText) != lineWithItem.line.text) {
-//                                removeLine(lineWithItem.line.id, myProjectService)
-//                                showBeRemoveLineWithItemList.add(lineWithItem)
-//                            }
+                        if (getTextByLineNumber(targetLineNumber, newDocumentText).replace(
+                                " ",
+                                ""
+                            ) != lineWithItem.line.text.replace(" ", "")
+                        ) {
+                            removeLine(lineWithItem.line.id)
+                            showBeRemoveLineWithItemList.add(lineWithItem)
+                            hasChange = true
+                        }
                     }
 
                 }
