@@ -22,7 +22,6 @@ import com.lane.util.UtilData
 
 class MyFileEditorManagerListener : FileEditorManagerListener {
 
-
     companion object {
         fun updateStackStateInEditorFile(
             myProjectService: MyProjectService,
@@ -58,27 +57,26 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
             }
         }
 
-        fun removeHighlighter(lineNumber: Int, textEditor: Editor?) {
+        fun removeHighlighter(lineNumber: Int, textEditor: Editor?): Boolean {
             if (textEditor == null) {
-                return
+                return false
             }
             val markupModel: MarkupModel = textEditor.markupModel
             val allHighLighters = markupModel.allHighlighters
-            if (allHighLighters.isEmpty()) {
-                markupModel.removeAllHighlighters()
-            } else {
-                for (itLighter in allHighLighters) {
-                    val value = itLighter.getUserData(UtilData.HigherKey)
-                    if (value != null && value == lineNumber) {
-                        markupModel.removeHighlighter(itLighter)
-                        break
-                    }
+            for (itLighter in allHighLighters) {
+                val value = itLighter.getUserData(UtilData.HigherKey)
+                if (value != null && value == lineNumber) {
+                    markupModel.removeHighlighter(itLighter)
+                    return true
                 }
 
             }
+            return false
+
         }
 
     }
+
 
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
         val openProjects: Array<Project> = ProjectManager.getInstance().openProjects

@@ -26,14 +26,16 @@ class DeleteItemOrLineAction : AnAction() {
                                 it.selectionLine
                             )
                             if (lineWithItemArray != null && lineWithItemArray.size == 1) {
-                                MyFileEditorManagerListener.removeHighlighter(
+                              val removeSuccess=  MyFileEditorManagerListener.removeHighlighter(
                                     it.selectionLine,
                                     editor
                                 )
+                                if (removeSuccess) {
+                                    myProjectService.deleteItem(userObj.id)//后删数据是为了前面的userObj.lineList数据不为空，如果先删数据，userObj.lineList为空走不进判断 ，则无法删除标记
+                                }
                             }
                         }
                     }
-                    myProjectService.deleteItem(userObj.id)//后删数据是为了前面的userObj.lineList数据不为空，如果先删数据，userObj.lineList为空走不进判断 ，则无法删除标记
                 }
 
                 is Line -> {

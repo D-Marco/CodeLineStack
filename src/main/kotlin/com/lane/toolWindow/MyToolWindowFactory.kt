@@ -107,6 +107,9 @@ class MyToolWindowFactory : ToolWindowFactory {
         override fun mousePressed(e: MouseEvent?) {
             if (e != null && e.button == MouseEvent.BUTTON3) {
                 val tree = e.component as Tree
+                if (tree.lastSelectedPathComponent == null) {
+                    return
+                }
                 val selectedNode = tree.lastSelectedPathComponent as DefaultMutableTreeNode
                 if (selectedNode.parent == null) {
                     return
