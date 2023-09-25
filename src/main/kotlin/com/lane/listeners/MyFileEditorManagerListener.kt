@@ -13,7 +13,6 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.lane.dataBeans.LineWithItem
 import com.lane.services.MyProjectService
@@ -25,18 +24,28 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
 
     companion object {
-        //添加左侧眼睛
-        fun updateEyeState(myProjectService: MyProjectService, fileRelationPath: String, textEditor: Editor) {
+        fun updateStackStateInEditorFile(
+            myProjectService: MyProjectService,
+            fileRelationPath: String,
+            textEditor: Editor?
+        ) {
+            if (textEditor == null) {
+                return
+            }
+            var markupModel: MarkupModel = textEditor.markupModel
+            markupModel.removeAllHighlighters()
             val allRelLineWithItemList = myProjectService.getLineWithItemListByFileName(fileRelationPath) ?: return
+
             for (it in allRelLineWithItemList) {
+                markupModel = textEditor.markupModel
+                val allHighLighters = markupModel.allHighlighters
                 var breakOut = false
                 val line = it.line
-                val markupModel: MarkupModel = textEditor.markupModel
-                val allHighLighters = markupModel.allHighlighters
                 for (itLighter in allHighLighters) {
                     val value = itLighter.getUserData(UtilData.HigherKey)
                     if (value != null && value == line.selectionLine) {
                         breakOut = true
+                        break
                     }
                 }
                 if (breakOut) {
@@ -48,6 +57,22 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
                     MyGutterIconRenderer(myProjectService, line.fileRelativePath, line.selectionLine)
             }
         }
+
+        fun removeHighlighter(myProjectService: MyProjectService, lineNumber: Int, textEditor: Editor?) {
+            if (textEditor == null) {
+                return
+            }
+            val markupModel: MarkupModel = textEditor.markupModel
+            val allHighLighters = markupModel.allHighlighters
+            for (itLighter in allHighLighters) {
+                val value = itLighter.getUserData(UtilData.HigherKey)
+                if (value != null && value == lineNumber) {
+                    markupModel.removeHighlighter(itLighter)
+                    break
+                }
+            }
+        }
+
     }
 
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
@@ -78,7 +103,7 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
         if (fileEditor == null || document == null) {
             return
         }
-        updateEyeState(myProjectService, fileRelationPath, textEditor)
+        updateStackStateInEditorFile(myProjectService, fileRelationPath, textEditor)
 
         document.addDocumentListener(
             MyDocumentListener(myProjectService, document, fileRelationPath, textEditor),
@@ -164,11 +189,11 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
                 }
                 if (showBeRemoveLineWithItemList.size > 0) {
                     lineWithItemList.removeAll(showBeRemoveLineWithItemList.toSet())
+                    myProjectService.saveLineStack()
                     hasChange = true
                 }
                 if (hasChange) {
-                    myProjectService.saveLineStack()
-                    updateEyeState(myProjectService, fileRelationPath, editor)
+                    updateStackStateInEditorFile(myProjectService, fileRelationPath, editor)
                 }
 
             }

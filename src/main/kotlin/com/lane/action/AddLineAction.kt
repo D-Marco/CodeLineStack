@@ -1,6 +1,5 @@
 package com.lane.action
 
-import com.intellij.icons.AllIcons
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -8,20 +7,12 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.markup.GutterIconRenderer
-import com.intellij.openapi.editor.markup.HighlighterLayer
-import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
-import com.lane.dataBeans.Item
 import com.lane.dataBeans.Line
 import com.lane.listeners.MyFileEditorManagerListener
 import com.lane.services.MyProjectService
-import com.lane.util.MyGutterIconRenderer
-import com.lane.util.UtilData
 import java.util.*
-import javax.swing.Icon
 
 
 class AddLineAction : AnAction() {
@@ -62,7 +53,7 @@ class AddLineAction : AnAction() {
 //                        textAttributes = TextAttributes()
 //                        textAttributes.backgroundColor = JBColor.RED
 //                        textAttributes.errorStripeColor = JBColor.RED
-                        MyFileEditorManagerListener.updateEyeState(myProjectService, filePath, editor)
+                        MyFileEditorManagerListener.updateStackStateInEditorFile(myProjectService, filePath, editor)
                     }
                 }
             }

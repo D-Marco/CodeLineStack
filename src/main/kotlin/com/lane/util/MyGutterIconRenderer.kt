@@ -6,7 +6,7 @@ import com.intellij.openapi.util.IconLoader
 import com.lane.services.MyProjectService
 import javax.swing.Icon
 
-class MyGutterIconRenderer(val myProjectService: MyProjectService, val filePath: String, val lineNum: Int) : GutterIconRenderer() {
+class MyGutterIconRenderer(val myProjectService: MyProjectService, private val filePath: String, private val lineNum: Int) : GutterIconRenderer() {
     private val highlightIcon = IconLoader.getIcon("/META-INF/stack.svg", javaClass)
 
     override fun equals(other: Any?): Boolean {
@@ -29,7 +29,7 @@ class MyGutterIconRenderer(val myProjectService: MyProjectService, val filePath:
                 if (it.line.selectionLine == lineNum) {
                     val step = it.item?.lineList?.indexOf(it.line)!! + 1
                     val itemName = it.item.name
-                    tooltip = "$tooltip$step step of $itemName\n"
+                    tooltip = "$tooltip$step step of [$itemName]\n"
                 }
 
             }

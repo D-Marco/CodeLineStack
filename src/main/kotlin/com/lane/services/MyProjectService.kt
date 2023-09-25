@@ -13,9 +13,7 @@ import com.lane.dataBeans.Item
 import com.lane.dataBeans.Line
 import com.lane.dataBeans.LineStack
 import com.lane.dataBeans.LineWithItem
-import java.io.File
-import java.io.FileOutputStream
-import java.io.FileReader
+import java.io.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.swing.tree.DefaultMutableTreeNode
@@ -117,14 +115,17 @@ class MyProjectService(val project: Project) {
         val storeFile = File(fullFilePath)
         val context = JAXBContext.newInstance(LineStack::class.java)
         val unmarshaller = context.createUnmarshaller()
-        return unmarshaller.unmarshal(FileReader(storeFile)) as LineStack
+        val reader = InputStreamReader(FileInputStream(storeFile), "UTF-8")
+        val lineStack = unmarshaller.unmarshal(reader) as LineStack
+        reader.close()
+        return  lineStack
     }
 
     fun saveLineStack() {
         val context = JAXBContext.newInstance(LineStack::class.java)
         val marshaller = context.createMarshaller()
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8")
         marshaller.marshal(lineStack, FileOutputStream(fullFilePath))
     }
 
@@ -442,8 +443,8 @@ class MyProjectService(val project: Project) {
     }
 
     fun getLineWithItemListByFileNameAndLineNumber(filePath: String, lineNumber: Int): ArrayList<LineWithItem>? {
-        val result: ArrayList<LineWithItem>? = lineMap[filePath]
-        result?.filter { it.line.selectionLine != lineNumber }
+        var result: ArrayList<LineWithItem>? = lineMap[filePath]
+       result= result?.filter { it.line.selectionLine == lineNumber } as ArrayList<LineWithItem>?
         return result
     }
 
