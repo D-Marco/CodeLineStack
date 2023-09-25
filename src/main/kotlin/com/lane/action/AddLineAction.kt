@@ -57,7 +57,7 @@ class AddLineAction : AnAction() {
                     if (myProjectService.existDefaultItem()) {
                         myProjectService.addLineToDefaultItem(line)
 
-                        val defaultItem: Item? = myProjectService.getDefaultItem()
+//                        val defaultItem: Item? = myProjectService.getDefaultItem()
 //                        val textAttributes: TextAttributes?
 //                        textAttributes = TextAttributes()
 //                        textAttributes.backgroundColor = JBColor.RED
