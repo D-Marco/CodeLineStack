@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <lineStack defaultItemId="8946fb47-5df4-4e3b-9608-99150ab86581" showLineIndexNumber="true" showClassName="true">
-    <item id="8946fb47-5df4-4e3b-9608-99150ab86581" name="112">
-        <line describe="" text="                        if (!StringUtils.isEmpty(nodeUserObj.describe)) {" id="6e43debb-dc0e-4ec5-9ced-c936e288d3d4" fileRelativePath="src/main/kotlin/com/lane/toolWindow/MyToolWindowFactory.kt" selectionLine="183" fileName="MyToolWindowFactory.kt"/>
-    </item>
+    <item id="8946fb47-5df4-4e3b-9608-99150ab86581" name="112"/>
 </lineStack>

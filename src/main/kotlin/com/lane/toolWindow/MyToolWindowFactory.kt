@@ -1,6 +1,7 @@
 package com.lane.toolWindow
 
 import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.LogicalPosition
@@ -113,23 +114,24 @@ class MyToolWindowFactory : ToolWindowFactory {
             val filePath = project.basePath + "/" + line.fileRelativePath
             val localFileSystem = LocalFileSystem.getInstance()
             val virtualFile = localFileSystem.findFileByPath(filePath)
+
             if (virtualFile != null) {
                 FileEditorManager.getInstance(project).openFile(virtualFile, true)
-                val editor = FileEditorManager.getInstance(project).selectedTextEditor
-                val document: Document = editor!!.document
-                if (lineNum >= 0 && lineNum < document.lineCount) {
-                    val cursorModel = editor.caretModel
-                    cursorModel.moveToOffset(editor.document.getLineStartOffset(lineNum))
-                    val timer = Timer()
-                    timer.schedule(object : TimerTask() {
-                        override fun run() {
-                            editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                val timer=Timer()
+                timer.schedule(object :TimerTask(){
+                    override fun run() {
+                        ApplicationManager.getApplication().invokeLater {
+                            val editor = FileEditorManager.getInstance(project).selectedTextEditor
+                            val document: Document = editor!!.document
+                            if (lineNum >= 0 && lineNum < document.lineCount) {
+                                val cursorModel = editor.caretModel
+                                cursorModel.moveToOffset(editor.document.getLineStartOffset(lineNum))
+                                editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
+                            }
                         }
+                    }
 
-                    },100)
-
-                }
-
+                },100)
             }
         }
 
