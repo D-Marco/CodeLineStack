@@ -89,27 +89,7 @@ class MyProjectService(val project: Project) {
         }
     }
 
-    /**
-     * 打开选中的代码行所在的位置
-     */
-    fun openSelectedFile(defaultTreeModel: DefaultMutableTreeNode) {
-        val line = defaultTreeModel.userObject as Line
-        val lineNum = line.selectionLine
-        val filePath = project.basePath + "/" + line.fileRelativePath
-        val localFileSystem = LocalFileSystem.getInstance()
-        val virtualFile = localFileSystem.findFileByPath(filePath)
-        if (virtualFile != null) {
-            FileEditorManager.getInstance(project).openFile(virtualFile, true)
-            val editor = FileEditorManager.getInstance(project).selectedTextEditor
-            val cursorModel = editor?.caretModel
-            val document: Document = editor!!.document
-            if (lineNum >= 0 && lineNum < document.lineCount) {
-                cursorModel?.moveToOffset(editor.document.getLineStartOffset(lineNum))
-                editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
-            }
 
-        }
-    }
 
     private fun getLineStack(): LineStack {
         val storeFile = File(fullFilePath)

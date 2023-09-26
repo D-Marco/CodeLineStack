@@ -1,14 +1,13 @@
 package com.lane.toolWindow
 
-import com.intellij.openapi.actionSystem.ActionGroup
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.ActionPlaces
-import com.intellij.openapi.actionSystem.ActionPopupMenu
-import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.ScrollType
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBScrollPane
@@ -53,8 +52,6 @@ class MyToolWindowFactory : ToolWindowFactory {
         val additionalGearActionGroup = ActionManager.getInstance().getAction("additionalGearActions") as ActionGroup
         toolWindow.setAdditionalGearActions(additionalGearActionGroup)
 
-        val additionalGearActionGroup1 = ActionManager.getInstance().getAction("additionalGearActions")
-
 
     }
 
@@ -75,7 +72,7 @@ class MyToolWindowFactory : ToolWindowFactory {
             tree.isRootVisible = false
             val myProjectService = toolWindow.project.service<MyProjectService>()
             tree.cellRenderer = CustomTreeCellRenderer(myProjectService)
-            tree.addMouseListener(MyMouseAdapter(myProjectService))
+            tree.addMouseListener(MyMouseAdapter(toolWindow.project))
             // tree add to panel
 //            panel.add(tree)
             scrollPane.viewport.add(tree)
@@ -91,7 +88,7 @@ class MyToolWindowFactory : ToolWindowFactory {
 
     }
 
-    class MyMouseAdapter(private val service: MyProjectService) : MouseAdapter() {
+    class MyMouseAdapter(private val project: Project) : MouseAdapter() {
         override fun mouseClicked(e: MouseEvent?) {
             if (e!!.clickCount == 2) { // 检查是否双击
                 val tree = e.component as Tree
@@ -99,9 +96,31 @@ class MyToolWindowFactory : ToolWindowFactory {
                 if (reePath != null) {
                     val node = reePath.lastPathComponent as DefaultMutableTreeNode
                     if (node.userObject is Line) {
-                        service.openSelectedFile(node)
+                        openSelectedFile(node)
                     }
                 }
+            }
+        }
+
+        /**
+         * 打开选中的代码行所在的位置
+         */
+        private fun openSelectedFile(defaultTreeModel: DefaultMutableTreeNode) {
+            val line = defaultTreeModel.userObject as Line
+            val lineNum = line.selectionLine
+            val filePath = project.basePath + "/" + line.fileRelativePath
+            val localFileSystem = LocalFileSystem.getInstance()
+            val virtualFile = localFileSystem.findFileByPath(filePath)
+            if (virtualFile != null) {
+                FileEditorManager.getInstance(project).openFile(virtualFile, true)
+                val editor = FileEditorManager.getInstance(project).selectedTextEditor
+                val cursorModel = editor?.caretModel
+                val document: Document = editor!!.document
+                if (lineNum >= 0 && lineNum < document.lineCount) {
+                    cursorModel?.moveToOffset(editor.document.getLineStartOffset(lineNum))
+                    editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                }
+
             }
         }
 
@@ -173,8 +192,6 @@ class MyToolWindowFactory : ToolWindowFactory {
                         val rootUserObj = rootNode.userObject as LineStack
                         val parentNode = treeNode.parent
                         val currentIndexOfParent = parentNode.getIndex(treeNode)
-                        var describeTagStr = ""
-
                         val reverseIndex =
                             if (rootUserObj.showLineIndexNumber) ((parentNode.childCount - currentIndexOfParent).toString() + ": ") else ""
                         val fileName = if (rootUserObj.showClassName) ("[" + nodeUserObj.fileName + "]") else ""
@@ -184,7 +201,7 @@ class MyToolWindowFactory : ToolWindowFactory {
                         if (!StringUtils.isEmpty(nodeUserObj.describe)) {
                             nodeLabel.icon = IconLoader.getIcon("/META-INF/cycle_bookmark.svg", javaClass)
 
-                        }else{
+                        } else {
                             nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmark.svg", javaClass)
                         }
 

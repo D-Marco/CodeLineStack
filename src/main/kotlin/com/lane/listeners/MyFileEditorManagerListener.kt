@@ -3,6 +3,7 @@ package com.lane.listeners
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -13,6 +14,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.messages.Topic
 import com.lane.dataBeans.LineWithItem
 import com.lane.services.MyProjectService
 import com.lane.util.MyGutterIconRenderer
@@ -77,8 +79,8 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
     }
 
-
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
+
         val myProjectService = source.project.service<MyProjectService>()
         ProjectManager.getInstance().defaultProject
         val editors = source.getEditors(file)
