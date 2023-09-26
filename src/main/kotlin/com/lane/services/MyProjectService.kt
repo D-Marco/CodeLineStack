@@ -280,21 +280,19 @@ class MyProjectService(val project: Project) {
     }
 
     fun expandRowAll() {
-        val itemList = lineStack?.itemList
         val itemNodeList: Enumeration<TreeNode>? = treeRoot?.children()
         if (itemNodeList != null) {
             for (itemNode in itemNodeList) {
-                tree?.expandPath(TreePath((itemNode as DefaultMutableTreeNode).path));
+                tree?.expandPath(TreePath((itemNode as DefaultMutableTreeNode).path))
             }
         }
     }
 
     fun collapseRowAll() {
-        val itemList = lineStack?.itemList
         val itemNodeList: Enumeration<TreeNode>? = treeRoot?.children()
         if (itemNodeList != null) {
             for (itemNode in itemNodeList) {
-                tree?.collapsePath(TreePath((itemNode as DefaultMutableTreeNode).path));
+                tree?.collapsePath(TreePath((itemNode as DefaultMutableTreeNode).path))
             }
         }
     }

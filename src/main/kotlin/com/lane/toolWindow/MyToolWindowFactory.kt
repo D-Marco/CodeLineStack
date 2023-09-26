@@ -18,6 +18,7 @@ import com.lane.dataBeans.Item
 import com.lane.dataBeans.Line
 import com.lane.dataBeans.LineStack
 import com.lane.services.MyProjectService
+import org.apache.commons.lang3.StringUtils
 import java.awt.Component
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -172,18 +173,24 @@ class MyToolWindowFactory : ToolWindowFactory {
                         val rootUserObj = rootNode.userObject as LineStack
                         val parentNode = treeNode.parent
                         val currentIndexOfParent = parentNode.getIndex(treeNode)
+                        var describeTagStr = ""
+
                         val reverseIndex =
-                            if (rootUserObj.showLineIndexNumber) ((parentNode.childCount - currentIndexOfParent).toString()+": ") else ""
+                            if (rootUserObj.showLineIndexNumber) ((parentNode.childCount - currentIndexOfParent).toString() + ": ") else ""
                         val fileName = if (rootUserObj.showClassName) ("[" + nodeUserObj.fileName + "]") else ""
                         val text = nodeUserObj.text
                         nodeLabel.text = "<html><font color='#ffffff'>$reverseIndex$fileName</font> $text</html>"
                         nodeLabel.toolTipText = nodeUserObj.describe
-                        nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmark.svg", javaClass)
+                        if (!StringUtils.isEmpty(nodeUserObj.describe)) {
+                            nodeLabel.icon = IconLoader.getIcon("/META-INF/cycle_bookmark.svg", javaClass)
+
+                        }else{
+                            nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmark.svg", javaClass)
+                        }
 
                     }
 
                     is Item -> {
-
                         nodeLabel.icon = IconLoader.getIcon("/META-INF/bookmarksList.svg", javaClass)
                         val name = nodeUserObj.name
                         if (defaultItem != null && defaultItem.id == nodeUserObj.id) {

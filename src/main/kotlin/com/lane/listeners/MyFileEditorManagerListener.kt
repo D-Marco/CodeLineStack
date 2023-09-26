@@ -11,7 +11,6 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.lane.dataBeans.LineWithItem
@@ -31,10 +30,11 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
             if (textEditor == null) {
                 return
             }
+
             var markupModel: MarkupModel = textEditor.markupModel
             markupModel.removeAllHighlighters()
-            val allRelLineWithItemList = myProjectService.getLineWithItemListByFileName(fileRelationPath) ?: return
 
+            val allRelLineWithItemList = myProjectService.getLineWithItemListByFileName(fileRelationPath) ?: return
             for (it in allRelLineWithItemList) {
                 markupModel = textEditor.markupModel
                 val allHighLighters = markupModel.allHighlighters
@@ -79,26 +79,25 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
 
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
-        val openProjects: Array<Project> = ProjectManager.getInstance().openProjects
-        val myProjectService = openProjects[0].service<MyProjectService>()
-        super.fileOpened(source, file)
+        val myProjectService = source.project.service<MyProjectService>()
+        ProjectManager.getInstance().defaultProject
         val editors = source.getEditors(file)
         if (editors.isEmpty()) {
             return
         }
-        var textEditor: Editor? = null
+        var editor: Editor? = null
 
-        for (editor in editors) {
-            if (editor is TextEditor) {
-                textEditor = editor.editor
+        for (editorItem in editors) {
+            if (editorItem is TextEditor) {
+                editor = editorItem.editor
                 break
                 // 在这里使用textEditor对象，它是Editor类型的对象
             }
         }
-        if (textEditor == null) {
+
+        if (editor == null) {
             return
         }
-
         val fileEditor = source.getSelectedEditor(file)
         val basePath = myProjectService.project.basePath
         val fileRelationPath = file.path.substring(basePath!!.length + 1)
@@ -106,10 +105,10 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
         if (fileEditor == null || document == null) {
             return
         }
-        updateStackStateInEditorFile(myProjectService, fileRelationPath, textEditor)
+        updateStackStateInEditorFile(myProjectService, fileRelationPath, editor)
 
         document.addDocumentListener(
-            MyDocumentListener(myProjectService, document, fileRelationPath, textEditor),
+            MyDocumentListener(myProjectService, document, fileRelationPath, editor),
             fileEditor
         )
     }
@@ -120,8 +119,8 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
         private var editor: Editor
     ) : DocumentListener {
         //            var beforeCaretNumber = -1
-        var lastLineCount = 0
-        var lastDocumentText = ""
+        private var lastLineCount = 0
+        private var lastDocumentText = ""
 
         override fun beforeDocumentChange(event: DocumentEvent) {
             lastDocumentText = document.text
@@ -261,7 +260,7 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
             return textLines[targetLine]
         }
 
-        fun removeLine(lineId: String) {
+        private fun removeLine(lineId: String) {
             myProjectService.deleteLine(lineId)
         }
 
