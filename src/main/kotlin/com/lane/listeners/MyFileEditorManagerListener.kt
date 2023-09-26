@@ -8,11 +8,9 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.MarkupModel
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.FileEditorManagerListener
-import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.fileEditor.*
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.util.Pair
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.messages.Topic
 import com.lane.dataBeans.LineWithItem
@@ -80,7 +78,6 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
     }
 
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
-
         val myProjectService = source.project.service<MyProjectService>()
         ProjectManager.getInstance().defaultProject
         val editors = source.getEditors(file)

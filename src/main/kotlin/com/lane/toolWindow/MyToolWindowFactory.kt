@@ -3,6 +3,7 @@ package com.lane.toolWindow
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.StringUtils
 import java.awt.Component
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.util.*
 import javax.swing.JLabel
 import javax.swing.JTree
 import javax.swing.tree.DefaultMutableTreeNode
@@ -114,11 +116,18 @@ class MyToolWindowFactory : ToolWindowFactory {
             if (virtualFile != null) {
                 FileEditorManager.getInstance(project).openFile(virtualFile, true)
                 val editor = FileEditorManager.getInstance(project).selectedTextEditor
-                val cursorModel = editor?.caretModel
                 val document: Document = editor!!.document
                 if (lineNum >= 0 && lineNum < document.lineCount) {
-                    cursorModel?.moveToOffset(editor.document.getLineStartOffset(lineNum))
-                    editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                    val cursorModel = editor.caretModel
+                    cursorModel.moveToOffset(editor.document.getLineStartOffset(lineNum))
+                    val timer = Timer()
+                    timer.schedule(object : TimerTask() {
+                        override fun run() {
+                            editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                        }
+
+                    },100)
+
                 }
 
             }
