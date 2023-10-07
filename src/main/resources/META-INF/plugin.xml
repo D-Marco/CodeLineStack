@@ -1,0 +1,169 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>CodeLineStack</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>CodeLineStack</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="mr.rtfsc@gmail.com" url="https://www.lane.com">lane</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    this is code line stack.<br>
+    This plugin is used to trace your method stack<br>
+    How to use it:
+    <ul>
+    <li>
+        Add An item as Default
+    </li>
+        <li>
+        Rright click in opened document ,and choose "Add this line to Stack"
+    </li>
+    </ul>
+  ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow factoryClass="com.lane.toolWindow.MyToolWindowFactory" id="CodeLineStack"
+                    icon="/META-INF/gray_stack.svg" secondary="true"/>
+
+    </extensions>
+
+    <actions>
+        <!--        <action class="com.lane.action.MyAction" description="Notification Send">-->
+        <!--            &lt;!&ndash; 该标签表示通过快捷键触发Action，注意快捷键可能会冲突，导致功能无法被触发，更换绑定的快捷键即可 &ndash;&gt;-->
+        <!--            <keyboard-shortcut first-keystroke="control shift o" keymap="$default"/>-->
+        <!--        </action>-->
+
+        <group id="titleActionMenu"/>
+        <group id="ItemActionMenu"/>
+        <group id="lineActionMenu"/>
+        <group id="additionalGearActions"/>
+
+        <action class="com.lane.action.AddItemAction" description="Add item" text="Add Item" id="action.AddItemAction"
+                icon="AllIcons.Actions.AddList">
+            <keyboard-shortcut first-keystroke="alt INSERT" keymap="$default"/>
+            <add-to-group group-id="titleActionMenu"/>
+        </action>
+        <action class="com.lane.action.ExpandAction"
+                text="Show Class Name"
+                icon="AllIcons.Actions.Expandall"
+                id="action.ExpandAction">
+            <add-to-group group-id="titleActionMenu"/>
+        </action>
+        <action class="com.lane.action.CollapseAction"
+                text="Show Class Name"
+                icon="AllIcons.Actions.Collapseall"
+                id="action.CollapseAction">
+            <add-to-group group-id="titleActionMenu"/>
+        </action>
+
+        <action class="com.lane.action.MakeItemAsDefaultAction"
+                description="Make item as Default (Action of add line will be added to this item by default)"
+                text="Make Item as Default ( Line of Code Will Be Added to This Item by Default) "
+                id="action.MakeItemAsDefaultAction">
+            <add-to-group group-id="ItemActionMenu"/>
+        </action>
+
+        <action class="com.lane.action.DeleteItemOrLineAction" text="Delete This Item"
+                id="action.DeleteItemAction"
+                icon="AllIcons.Actions.DeleteTagHover">
+            <add-to-group group-id="ItemActionMenu"/>
+            <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.EditItemOrLineAction" text="Rename This Item Describe"
+                id="action.EditItemAction"
+                icon="AllIcons.Actions.Edit">
+            <add-to-group group-id="ItemActionMenu"/>
+            <keyboard-shortcut first-keystroke="F2" keymap="$default"/>
+        </action>
+
+
+        <action class="com.lane.action.AddLineAction"
+                text="Add This Line To Stack"
+                id="action.AddLineAction">
+            <add-to-group anchor="first" group-id="EditorPopupMenu"/>
+        </action>
+
+        <action class="com.lane.action.DeleteItemOrLineAction"
+                text="Delete Line From Item"
+                icon="AllIcons.Actions.DeleteTagHover"
+                id="action.DeleteLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="DELETE" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.EditItemOrLineAction"
+                text="Rename Describe"
+                icon="AllIcons.Actions.Edit"
+                id="action.EditLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="F2" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.MoveUpItemOrLineAction"
+                text="Move Up"
+                icon="AllIcons.Actions.Upload"
+                id="action.MoveUpItemAction">
+            <add-to-group group-id="ItemActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt UP" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.MoveUpItemOrLineAction"
+                text="Move Up"
+                icon="AllIcons.Actions.Upload"
+                id="action.MoveUpLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt UP" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.MoveDownItemOrLineAction"
+                text="Move Down"
+                icon="AllIcons.Actions.Download"
+                id="action.MoveDownItemAction">
+            <add-to-group group-id="ItemActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt DOWN" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.MoveDownItemOrLineAction"
+                text="Move Down"
+                icon="AllIcons.Actions.Download"
+                id="action.MoveDownLineAction">
+            <add-to-group group-id="lineActionMenu"/>
+            <keyboard-shortcut first-keystroke="ctrl alt DOWN" keymap="$default"/>
+        </action>
+
+        <action class="com.lane.action.ShowLineIndexAction"
+                text="Show Line Index"
+                icon="AllIcons.Actions.Checked"
+                id="action.ShowLineIndexAction">
+            <add-to-group group-id="additionalGearActions"/>
+        </action>
+        <action class="com.lane.action.ShowClassNameAction"
+                text="Show Class Name"
+                icon="AllIcons.Actions.Checked"
+                id="action.ShowClassNameAction">
+            <add-to-group group-id="additionalGearActions"/>
+        </action>
+
+    </actions>
+
+
+    <applicationListeners>
+        <listener class="com.lane.listeners.MyApplicationActivationListener"
+                  topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.lane.listeners.MyFileEditorManagerListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </applicationListeners>
+</idea-plugin>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<lineStack defaultItemId="item1Id">
+    <item name="item1" id="item1Id">
+        <line fileName="RabbitMqConfig" describe="this is item1 describe text111" text="item1 text1" selectionLine="17"
+              fileRelativePath="gateway-mi/src/main/java/com/linewell/gateway/config/RabbitMqConfig.java"/>
+        <line fileName="RabbitMqConfig" describe="this is item1 describe text22" text="item2 text2" selectionLine="27"
+              fileRelativePath="gateway-mi/src/main/java/com/linewell/gateway/config/RabbitMqConfig.java"/>
+        <line fileName="DefaultFastjsonConfig" describe="this is item1 describe text22" text="item3 text3" selectionLine="37"
+              fileRelativePath="gateway-mi/src/main/java/com/linewell/gateway/config/DefaultFastjsonConfig.java"/>
+    </item>
+    <item name="item2" id="item2Id">
+        <line fileName="RabbitMqConfig" describe="this is item2 describe text111" text="item2 text1" selectionLine="47"
+              fileRelativePath="gateway-mi/src/main/java/com/linewell/gateway/config/RabbitMqConfig.java"/>
+        <line fileName="RabbitMqConfig" describe="this is item2 describe text22" text="item2 text2" selectionLine="57"
+              fileRelativePath="gateway-mi/src/main/java/com/linewell/gateway/config/RabbitMqConfig.java"/>
+        <line fileName="DefaultFastjsonConfig" describe="this is item2 describe text22" text="item2 text3" selectionLine="27"
+              fileRelativePath="gateway-mi/src/main/java/com/linewell/gateway/config/DefaultFastjsonConfig.java"/>
+    </item>
+</lineStack>
