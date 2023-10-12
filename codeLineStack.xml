@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <lineStack defaultItemId="8946fb47-5df4-4e3b-9608-99150ab86581" showLineIndexNumber="true" showClassName="true">
-    <item id="8946fb47-5df4-4e3b-9608-99150ab86581" name="112"/>
+    <item id="8946fb47-5df4-4e3b-9608-99150ab86581" name="112">
+        <line describe="" text="            tree = Tree(DefaultTreeModel(root))" id="46d76e61-321c-453b-8b08-9cdb09b4d99f" fileRelativePath="src/main/kotlin/com/lane/toolWindow/MyToolWindowFactory.kt" selectionLine="71" fileName="MyToolWindowFactory.kt"/>
+        <line describe="" text="            tree.setDragEnabled(true)" id="fae1c582-e4eb-4507-b228-d9e3f3ba634c" fileRelativePath="src/main/kotlin/com/lane/toolWindow/MyToolWindowFactory.kt" selectionLine="73" fileName="MyToolWindowFactory.kt"/>
+        <line describe="" text="            val myProjectService = toolWindow.project.service&lt;MyProjectService&gt;()" id="780ccb72-1c15-4281-8769-9353bc911c43" fileRelativePath="src/main/kotlin/com/lane/toolWindow/MyToolWindowFactory.kt" selectionLine="75" fileName="MyToolWindowFactory.kt"/>
+        <line describe="" text="        fun getContent(): JBScrollPane {" id="497e4123-c02c-479d-8ed5-abe9e2110732" fileRelativePath="src/main/kotlin/com/lane/toolWindow/MyToolWindowFactory.kt" selectionLine="83" fileName="MyToolWindowFactory.kt"/>
+    </item>
 </lineStack>

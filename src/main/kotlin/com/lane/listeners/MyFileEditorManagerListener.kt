@@ -181,10 +181,7 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
                         }
                     } else {
-                        if (getTextByLineNumber(targetLineNumber, newDocumentText).replace(
-                                " ",
-                                ""
-                            ) != lineWithItem.line.text.replace(" ", "")
+                        if (getTextByLineNumber(targetLineNumber, newDocumentText).replace(Regex("[\\s\\t]+"), "") != lineWithItem.line.text.replace(Regex("[\\s\\t]+"), "")
                         ) {
                             removeLine(lineWithItem.line.id)
                             showBeRemoveLineWithItemList.add(lineWithItem)
