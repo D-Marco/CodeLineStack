@@ -3,16 +3,16 @@ package com.lane.listeners
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.MarkupModel
-import com.intellij.openapi.fileEditor.*
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.FileEditorManagerListener
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.util.Pair
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.messages.Topic
 import com.lane.dataBeans.LineWithItem
 import com.lane.services.MyProjectService
 import com.lane.util.MyGutterIconRenderer
@@ -161,13 +161,21 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
                             }
                         } else {
                             if (hasChangeAfter) {
-                                if (getTextByLineNumber(targetLineNumber, newDocumentText) != lineWithItem.line.text) {
+                                if (!textLineTextEquals(
+                                        getTextByLineNumber(targetLineNumber, newDocumentText),
+                                        lineWithItem.line.text
+                                    )
+                                ) {
                                     removeLine(lineWithItem.line.id)
                                     showBeRemoveLineWithItemList.add(lineWithItem)
                                     hasChange = true
                                 }
                             } else {
-                                if (getTextByLineNumber(targetLineNumber, newDocumentText) != lineWithItem.line.text) {
+                                if (!textLineTextEquals(
+                                        getTextByLineNumber(targetLineNumber, newDocumentText),
+                                        lineWithItem.line.text
+                                    )
+                                ) {
                                     removeLine(lineWithItem.line.id)
                                     showBeRemoveLineWithItemList.add(lineWithItem)
                                     hasChange = true
@@ -181,7 +189,10 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
                         }
                     } else {
-                        if (getTextByLineNumber(targetLineNumber, newDocumentText).replace(Regex("[\\s\\t]+"), "") != lineWithItem.line.text.replace(Regex("[\\s\\t]+"), "")
+                        if (!textLineTextEquals(
+                                getTextByLineNumber(targetLineNumber, newDocumentText),
+                                lineWithItem.line.text
+                            )
                         ) {
                             removeLine(lineWithItem.line.id)
                             showBeRemoveLineWithItemList.add(lineWithItem)
@@ -201,6 +212,10 @@ class MyFileEditorManagerListener : FileEditorManagerListener {
 
             }
 
+        }
+
+        private fun textLineTextEquals(a0: String, a1: String): Boolean {
+            return a0.replace(Regex("[\\s\\t]+"), "") == a1.replace(Regex("[\\s\\t]+"), "")
         }
 
         private fun textHasChangeAfterLine(targetLine: Int, oldText: String, newText: String): Boolean {
